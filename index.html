@@ -2,111 +2,325 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Nexo Temporal | Natasha</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexo del Jardín | Mapa Volumétrico 3D</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #0a0110; font-family: sans-serif; color: white; }
-        #loader { position: fixed; width: 100%; height: 100%; background: #000; z-index: 1000; display: flex; justify-content: center; align-items: center; transition: 1s; }
-        #ui { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 10; text-align: center; padding: 50px; box-sizing: border-box; }
-        #caption { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); font-size: 1.5rem; font-style: italic; opacity: 0; transition: 0.5s; color: #ffebf2; }
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Montserrat:wght@200;600&display=swap');
+        body { margin: 0; overflow: hidden; background: #010103; font-family: 'Montserrat', sans-serif; color: white; }
+        
+        #ui { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 10; padding: 50px; box-sizing: border-box; }
+        .header h1 { font-family: 'Cinzel Decorative', cursive; margin: 0; font-size: 2.5rem; color: #ffffff; text-shadow: 0 0 15px rgba(255,100,150,0.8); letter-spacing: 5px; opacity: 0; animation: fadeIn 2s forwards; }
+        
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        
+        #instrucciones { position: absolute; bottom: 30px; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 10px; letter-spacing: 3px; text-transform: uppercase; }
+        #loader { position: fixed; width: 100%; height: 100%; background: #000; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 1s; }
+        #loader .p { color: white; letter-spacing: 5px; font-size: 10px; margin-top: 20px;}
     </style>
 </head>
 <body>
 
-<div id="loader"><h2>CARGANDO JARDÍN SINCRONIZADO...</h2></div>
+<div id="loader"><h2 style="color: #ff3377; letter-spacing: 8px;">GENERANDO MAPA...</h2><div class="p">COMPONIENDO GEOMETRÍA</div></div>
 
 <div id="ui">
-    <h1 style="letter-spacing: 10px;">NATASHA</h1>
-    <div id="caption"></div>
+    <div class="header" style="transform: translateY(-20px);">
+        <h1>NEXO DEL JARDÍN</h1>
+        <p style="font-weight: 200; letter-spacing: 8px; color: rgba(255,255,255,0.7); font-size: 12px;">Mapa Funcional Procedimental v1.0</p>
+    </div>
+    <div id="instrucciones">Utiliza el mouse para orbitar | Haz clic en los hongos principales</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 
 <script>
-let scene, camera, renderer, controls, hongos = [];
-const frases = ["Primer mirada ❤️", "Tu risa", "30 de Octubre", "Nuestro amor", "Siempre tú"];
+let scene, camera, renderer, controls, raycaster, mouse;
+let nexus_hongos = [], deco_hongos = [], cesped_patches = [], fireflies;
+let groundMirror;
+let clock = new THREE.Clock();
 
 function init() {
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 30, 60);
+    scene.fog = new THREE.FogExp2(0x010103, 0.015);
 
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
+    camera.position.set(0, 150, 250); // Vista panorámica del mapa
+
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); 
+    renderer.outputEncoding = THREE.sRGBEncoding;
     document.body.appendChild(renderer.domElement);
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
-    
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const light = new THREE.PointLight(0xff3377, 2, 100);
-    light.position.set(0, 20, 10);
-    scene.add(light);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.02;
+    controls.minDistance = 50;
+    controls.maxDistance = 800;
+    controls.maxPolarAngle = Math.PI / 2 - 0.1;
 
-    // Suelo
-    const floor = new THREE.Mesh(new THREE.CircleGeometry(50, 32), new THREE.MeshStandardMaterial({color: 0x111111}));
-    floor.rotation.x = -Math.PI/2;
-    scene.add(floor);
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
 
-    // Crear "Hongos" con esferas (Para que no falle por falta de archivos)
-    for(let i=0; i<5; i++) {
-        const hongo = new THREE.Group();
-        
-        // Sombrero del hongo
-        const head = new THREE.Mesh(
-            new THREE.SphereGeometry(2, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2),
-            new THREE.MeshPhongMaterial({color: 0xff3377, emissive: 0x550022})
-        );
-        hongo.add(head);
+    // 1. ILUMINACIÓN VOLUMÉTRICA BASE
+    scene.add(new THREE.AmbientLight(0x0a050a, 1));
+    scene.add(new THREE.HemisphereLight(0xff3377, 0x0000ff, 0.5)); // Rosa arriba, azul abajo
 
-        // Tallo
-        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 3), new THREE.MeshPhongMaterial({color: 0xeeeeee}));
-        stem.position.y = -1.5;
-        hongo.add(stem);
+    // 2. SUELO DE ESPEJO INFINITO
+    const mirrorGeo = new THREE.PlaneGeometry(1000, 1000);
+    groundMirror = new THREE.Reflector(mirrorGeo, {
+        clipBias: 0.003, textureWidth: window.innerWidth * window.devicePixelRatio,
+        textureHeight: window.innerHeight * window.devicePixelRatio,
+        color: 0x080808, recursion: 1
+    });
+    groundMirror.rotation.x = -Math.PI / 2;
+    groundMirror.position.y = -0.5;
+    scene.add(groundMirror);
 
-        const angle = (i/5) * Math.PI * 2;
-        hongo.position.set(Math.cos(angle)*20, 1.5, Math.sin(angle)*20);
-        hongo.userData = { msg: frases[i] };
-        scene.add(hongo);
-        hongos.push(hongo);
+    // 3. ARQUITECTURA: EL COMPLEJO DE DOMOS INTERCONECTADOS
+    const mainDome = new THREE.Mesh(
+        new THREE.SphereGeometry(150, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2),
+        new THREE.MeshPhongMaterial({ color: 0x442244, wireframe: true, transparent: true, opacity: 0.03 })
+    );
+    scene.add(mainDome);
+
+    // Domos satélite
+    for(let i=0; i<4; i++) {
+        const sDome = mainDome.clone();
+        sDome.geometry = new THREE.SphereGeometry(60, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2);
+        const angle = (i / 4) * Math.PI * 2;
+        sDome.position.set(Math.cos(angle)*150, 0, Math.sin(angle)*150);
+        scene.add(sDome);
     }
 
-    document.getElementById('loader').style.opacity = '0';
-    setTimeout(() => document.getElementById('loader').remove(), 1000);
+    // 4. LUCIÉRNAGAS
+    const fGeo = new THREE.BufferGeometry();
+    const fPos = [];
+    for(let i=0; i<500; i++) fPos.push((Math.random()-0.5)*300, Math.random()*80, (Math.random()-0.5)*300);
+    fGeo.setAttribute('position', new THREE.Float32BufferAttribute(fPos, 3));
+    fireflies = new THREE.Points(fGeo, new THREE.PointsMaterial({color: 0xfff59d, size: 0.8, transparent: true, blending: THREE.AdditiveBlending}));
+    scene.add(fireflies);
 
-    window.addEventListener('click', onDocClick);
+    // 5. GENERACIÓN PROCEDIMENTAL (Aquí está la "Ambición")
+    createGrassMap();
+    createFungiMap();
+
+    // Arrancar la experiencia
+    setTimeout(() => {
+        document.getElementById('loader').style.opacity = '0';
+        setTimeout(() => document.getElementById('loader').remove(), 1000);
+        
+        // GSAP Intro cinematográfica
+        gsap.to(camera.position, {y: 40, z: 120, duration: 5, ease: "power2.inOut"});
+    }, 2000);
+
+    window.addEventListener('click', onClick);
     animate();
 }
 
-function onDocClick(e) {
-    const mouse = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
-    const ray = new THREE.Raycaster();
-    ray.setFromCamera(mouse, camera);
-    const intersects = ray.intersectObjects(hongos, true);
-    
-    if(intersects.length > 0) {
-        let obj = intersects[0].object.parent;
-        const cap = document.getElementById('caption');
-        cap.innerText = obj.userData.msg;
-        cap.style.opacity = '1';
-        
-        gsap.to(camera.position, {
-            x: obj.position.x * 1.5, y: 10, z: obj.position.z * 1.5, duration: 1.5,
-            onUpdate: () => camera.lookAt(obj.position)
-        });
+// FUNCIÓN PARA CREAR 600 PARCHES DE CÉSPED PROCEDIMENTAL
+function createGrassMap() {
+    // Usamos cubos estirados para simular "stylized grass"
+    const grassGeo = new THREE.CylinderGeometry(0.1, 0.4, 2, 4);
+    const grassMat = new THREE.MeshStandardMaterial({
+        color: 0x0a1a05, emissive: 0x051a05, metalness: 0, roughness: 1, flatShading: true
+    });
 
-        setTimeout(() => { cap.style.opacity = '0'; }, 3000);
+    for(let i=0; i<600; i++) {
+        // Racimo
+        const cluster = new THREE.Group();
+        for(let j=0; j<5; j++) {
+            const blade = new THREE.Mesh(grassGeo, grassMat);
+            blade.position.set((Math.random()-0.5)*1.5, Math.random()*0.5, (Math.random()-0.5)*1.5);
+            blade.rotation.x = (Math.random()-0.5) * 0.3;
+            blade.rotation.y = Math.random()*Math.PI;
+            blade.scale.y = 1 + Math.random()*1.5;
+            cluster.add(blade);
+        }
+        
+        // Posición en el mapa
+        const x = (Math.random()-0.5) * 350;
+        const z = (Math.random()-0.5) * 350;
+        // Evitar el centro exacto
+        if(Math.sqrt(x*x + z*z) > 10) {
+            cluster.position.set(x, 1, z);
+            cluster.rotation.y = Math.random()*Math.PI;
+            scene.add(cluster);
+            cesped_patches.push(cluster);
+        }
     }
 }
 
+// FUNCIÓN PARA CREAR HONGOS PROCEDIMENTALES (Nexo y Decoración)
+function createFungiMap() {
+    // Geometría del sombrero (AAA Art Ambition - Mitad de esfera)
+    const capGeo = new THREE.SphereGeometry(3, 12, 12, 0, Math.PI * 2, 0, Math.PI / 2);
+    // Geometría del tallo
+    const stemGeo = new THREE.CylinderGeometry(0.5, 1, 6, 8);
+
+    // A. 120 Hongos de Decoración
+    for(let i=0; i<120; i++) {
+        const hongoGroup = new THREE.Group();
+        
+        // Tallo
+        const stem = new THREE.Mesh(stemGeo, new THREE.MeshPhongMaterial({color: 0xeeeeee}));
+        stem.position.y = 3;
+        hongoGroup.add(stem);
+
+        // Sombrero
+        const cap = new THREE.Mesh(capGeo, new THREE.MeshPhongMaterial({
+            color: 0xffffff, emissive: 0x00ffff, emissiveIntensity: 0.3, // Brillo azul neón
+            transparent: true, opacity: 0.8, flatShading: true
+        }));
+        cap.position.y = 6;
+        cap.rotation.x = Math.PI; // Invertir
+        hongoGroup.add(cap);
+        
+        // Brillo suave azul
+        const l = new THREE.PointLight(0x00ffff, 0.5, 10);
+        l.position.y = 6;
+        hongoGroup.add(l);
+
+        hongoGroup.position.set((Math.random()-0.5)*350, 0, (Math.random()-0.5)*350);
+        hongoGroup.scale.setScalar(0.5 + Math.random()*1.5);
+        
+        scene.add(hongoGroup);
+        deco_hongos.push(hongoGroup);
+    }
+
+    // B. Los 5 HONGOS NEXO PRINCIPALES
+    for(let i=0; i<5; i++) {
+        const nexoGroup = new THREE.Group();
+        
+        // Tallo
+        const stem = new THREE.Mesh(stemGeo, new THREE.MeshPhongMaterial({color: 0xffffff}));
+        stem.position.y = 3;
+        nexoGroup.add(stem);
+
+        // Sombrero Protagonista (AAA Art Ambition - Material neón fractal)
+        const cap = new THREE.Mesh(capGeo, new THREE.MeshPhongMaterial({
+            color: 0xffffff, emissive: 0xff3377, emissiveIntensity: 1, // Brillo rosa intenso
+            shininess: 100, flatShading: true
+        }));
+        cap.position.y = 6;
+        cap.rotation.x = Math.PI; 
+        nexoGroup.add(cap);
+
+        // Luz neón rosa intensa
+        const l = new THREE.PointLight(0xff3377, 4, 30);
+        l.position.y = 8;
+        nexoGroup.add(l);
+
+        // Posición circular estratégica
+        const angle = (i/5) * Math.PI*2;
+        nexoGroup.position.set(Math.cos(angle)*60, 0, Math.sin(angle)*60);
+        nexoGroup.scale.setScalar(3); // Grandes y protagonistas
+        nexoGroup.userData = { active: false, id: i };
+        
+        scene.add(nexoGroup);
+        nexus_hongos.push(nexoGroup);
+    }
+}
+
+// LÓGICA DE INTERACCIÓN Y CINEMÁTICAS
+function onClick(e) {
+    const mouse = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(mouse, camera);
+    const intersects = ray.intersectObjects(nexus_hongos, true);
+    
+    if(intersects.length > 0) {
+        let obj = intersects[0].object;
+        while(obj.parent && obj.type !== 'Group') obj = obj.parent; // Encontrar el Nexo
+        
+        activateNexus(obj);
+    }
+}
+
+function activateNexus(nexo) {
+    if(nexo.userData.active) return;
+    nexo.userData.active = true;
+
+    // Cinemática Cinematográfica con GSAP
+    const tl = gsap.timeline();
+    
+    // 1. Viaje de cámara hiper-suave al hongo nexo
+    tl.to(camera.position, {
+        x: nexo.position.x * 1.5,
+        y: nexo.position.y + 15,
+        z: nexo.position.z * 1.5,
+        duration: 2,
+        ease: "power3.inOut",
+        onUpdate: () => camera.lookAt(nexo.position.x, 8, nexo.position.z)
+    });
+
+    // 2. Activación del Nexo (Lanzamiento de pulso volumétrico)
+    const l = nexo.children[1];
+    const tlPulse = gsap.timeline();
+    tlPulse.to(l, { intensity: 100, duration: 0.1, yoyo: true, repeat: 1 }); // Flash
+    tlPulse.to(nexo.scale, { x: 4, y: 4, z: 4, duration: 0.3, ease: "elastic.out(1, 0.3)" }, "-=0.2");
+    tlPulse.to(l, { intensity: 5, duration: 1, ease: "power2.out" }); // Quedar brillando
+
+    // 3. Regresar cámara a vista panorámica
+    tl.to(camera.position, { x: 0, y: 40, z: 120, duration: 3, ease: "power2.inOut" }, "+=3");
+    tl.call(() => { nexo.userData.active = false; }); // Permitir re-activar
+}
+
+// BUCLE DE ANIMACIÓN
 function animate() {
     requestAnimationFrame(animate);
-    hongos.forEach((h, i) => h.position.y = 1.5 + Math.sin(Date.now()*0.002 + i) * 0.5);
-    controls.update();
+    controls.update(); 
+
+    const t = clock.getElapsedTime();
+    
+    // Movimiento orgánico de luciérnagas
+    if(fireflies) {
+        fireflies.position.y = Math.sin(t * 0.3) * 5;
+        fireflies.rotation.y += 0.0003;
+    }
+
+    // Animación de parches de césped (Balanceo suave)
+    cesped_patches.forEach((c, i) => {
+        c.rotation.z = Math.sin(t*0.5 + i) * 0.05;
+        c.children.forEach(b => b.scale.y = (1.5 + Math.sin(t*2+i*0.1)*0.5) );
+    });
+
+    // Animación de hongos de decoración (Pulsando azul)
+    deco_hongos.forEach((h, i) => {
+        if(h.children[1]) {
+             h.children[1].intensity = 0.5 + Math.sin(t*2 + i) * 0.3;
+             h.position.y = Math.sin(t*0.5 + i) * 0.5; // Flotando suave
+        }
+    });
+
+    // Animación de hongos nexo
+    nexus_hongos.forEach((n, i) => {
+        if(!n.userData.active) {
+            n.position.y = Math.sin(t + i) * 0.3; // Flotando mágico
+            n.children[1].intensity = 4 + Math.sin(t*3 + i) * 2; // Pulsando neón
+            n.rotation.y += 0.005;
+        } else {
+             n.rotation.y += 0.05; // Girar rápido si está activo
+        }
+    });
+
     renderer.render(scene, camera);
 }
 
+// Iniciar
 init();
+
+// Ajuste de pantalla perfecto
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if(groundMirror) {
+        groundMirror.getRenderTarget().setSize(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio);
+    }
+});
 </script>
 </body>
 </html>
