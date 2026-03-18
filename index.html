@@ -3,229 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Para Mi Natasha - 30 de Octubre</title>
+    <title>30 de Octubre | Nuestro Inicio</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@200;400&display=swap');
-
         body {
             margin: 0;
-            padding: 0;
-            background: #0a0112; /* Fondo noche profunda */
+            background: #05010a;
             color: white;
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
 
-        /* Lienzo de estrellas/pétalos */
-        #canvas {
+        /* Estrellas de fondo */
+        .stars {
             position: fixed;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                        radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                        radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            opacity: 0.3;
             z-index: -1;
         }
 
-        header {
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            margin-top: 10vh;
-            z-index: 10;
+            background: radial-gradient(circle, rgba(255,51,119,0.1) 0%, rgba(5,1,10,1) 70%);
         }
 
         h1 {
-            font-family: 'Dancing Script', cursive;
-            font-size: 4rem;
+            font-size: 3.5rem;
+            margin: 0;
             color: #ff3377;
-            text-shadow: 0 0 20px rgba(255, 51, 119, 0.8);
-            margin-bottom: 10px;
+            text-shadow: 0 0 20px #ff3377;
         }
 
-        .fecha {
-            letter-spacing: 5px;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
-            text-transform: uppercase;
-        }
-
-        /* Contador */
-        .contador-container {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px 40px;
-            border-radius: 50px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 51, 119, 0.3);
-            margin-top: 5vh;
-            text-align: center;
-        }
-
-        #timer {
+        .date {
             font-size: 1.2rem;
-            font-weight: 200;
-            color: #ffebf2;
+            letter-spacing: 10px;
+            margin-bottom: 20px;
+            opacity: 0.7;
         }
 
-        /* Mensajes que flotan */
-        .garden {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 50px;
-            max-width: 1000px;
-            margin-top: 5vh;
+        /* Corazón latente */
+        .heart {
+            font-size: 50px;
+            color: #ff3377;
+            animation: pulse 1.5s infinite;
+            margin: 20px;
         }
 
-        .memsaje-card {
-            width: 250px;
-            height: 150px;
-            background: rgba(20, 10, 30, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.4s ease;
+        @keyframes pulse {
+            0% { transform: scale(1); text-shadow: 0 0 10px #ff3377; }
+            50% { transform: scale(1.2); text-shadow: 0 0 30px #ff3377; }
+            100% { transform: scale(1); text-shadow: 0 0 10px #ff3377; }
+        }
+
+        .timeline {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 50px 20px;
+            border-left: 2px solid rgba(255, 51, 119, 0.3);
+        }
+
+        .event {
             position: relative;
-            overflow: hidden;
+            margin-bottom: 50px;
+            padding-left: 30px;
         }
 
-        .memsaje-card:hover {
-            border-color: #ff3377;
-            transform: translateY(-10px);
-            box-shadow: 0 10px 30px rgba(255, 51, 119, 0.3);
-            background: rgba(40, 10, 40, 0.9);
-        }
-
-        .memsaje-card p {
-            font-size: 0.9rem;
-            line-height: 1.5;
-            opacity: 0.8;
-        }
-
-        .corazon-icon {
+        .event::before {
+            content: '';
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            color: #ff3377;
-            font-size: 1.2rem;
-            opacity: 0.3;
+            left: -11px;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            background: #ff3377;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ff3377;
         }
+
+        .event h3 { color: #ff3377; margin: 0 0 10px 0; }
+        .event p { line-height: 1.6; opacity: 0.9; }
 
         footer {
-            margin: 50px 0;
+            text-align: center;
+            padding: 50px;
             font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.3);
+            opacity: 0.5;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="canvas"></canvas>
+    <div class="stars"></div>
 
-    <header>
-        <p class="fecha">Desde el 30 de Octubre</p>
-        <h1>Para Mi Natasha</h1>
-    </header>
+    <section class="hero">
+        <div class="date">30 • OCTUBRE</div>
+        <h1>Natasha</h1>
+        <div class="heart">❤</div>
+        <p>Desliza para ver nuestra historia</p>
+    </section>
 
-    <div class="contador-container">
-        <p style="margin: 0 0 10px 0; font-size: 0.7rem; letter-spacing: 2px;">TIEMPO A TU LADO</p>
-        <div id="timer">Cargando momentos...</div>
-    </div>
-
-    <div class="garden">
-        <div class="memsaje-card">
-            <p>"Ese 30 de octubre cambió mi mundo para siempre. Gracias por decir que sí."</p>
-            <span class="corazon-icon">❤</span>
+    <div class="timeline">
+        <div class="event">
+            <h3>El Momento Cero</h3>
+            <p>Ese día de octubre donde todo cobró sentido y te pedí que fueras mi novia. El mejor "sí" de mi vida.</p>
         </div>
-        <div class="memsaje-card">
-            <p>"Eres la razón por la que mis días brillan más. Te amo cada día más."</p>
-            <span class="corazon-icon">❤</span>
+        <div class="event">
+            <h3>Nuestra Magia</h3>
+            <p>Cada risa, cada salida y cada detalle que ha construido lo que somos hoy. No cambiaría nada.</p>
         </div>
-        <div class="memsaje-card">
-            <p>"Nuestro amor es como este jardín: eterno, brillante y único."</p>
-            <span class="corazon-icon">❤</span>
+        <div class="event">
+            <h3>El Presente</h3>
+            <p>Aquí estamos, celebrando que nos elegimos cada día. Eres mi persona favorita.</p>
         </div>
-        <div class="memsaje-card">
-            <p>"Cada segundo contigo es un regalo que atesoro en mi corazón."</p>
-            <span class="corazon-icon">❤</span>
+        <div class="event">
+            <h3>El Futuro</h3>
+            <p>Lo mejor está por venir. Quiero seguir escribiendo capítulos a tu lado.</p>
         </div>
     </div>
 
-    <footer>Hecho con amor para la mujer de mi vida</footer>
+    <footer>Creado con amor para Natasha • 2026</footer>
 
-    <script>
-        // 1. Efecto Visual de Fondo (Partículas Mágicas)
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Particle {
-            constructor() {
-                this.reset();
-            }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 1;
-                this.speedY = Math.random() * 0.5 + 0.2;
-                this.opacity = Math.random() * 0.5 + 0.2;
-                this.color = Math.random() > 0.5 ? '#ff3377' : '#ffffff';
-            }
-            update() {
-                this.y -= this.speedY;
-                if (this.y < 0) this.reset();
-            }
-            draw() {
-                ctx.globalAlpha = this.opacity;
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < 100; i++) particles.push(new Particle());
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        // 2. Lógica del Contador (Desde el 30 de Octubre)
-        // Puedes cambiar el año aquí si fue hace más tiempo
-        const fechaInicio = new Date("October 30, 2025 00:00:00").getTime();
-
-        function updateTimer() {
-            const ahora = new Date().getTime();
-            const diferencia = ahora - fechaInicio;
-
-            const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
-            const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
-            const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
-
-            document.getElementById("timer").innerHTML = 
-                `${dias}d ${horas}h ${minutos}m ${segundos}s`;
-        }
-
-        setInterval(updateTimer, 1000);
-        updateTimer();
-    </script>
 </body>
 </html>
