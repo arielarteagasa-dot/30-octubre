@@ -2,355 +2,111 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexo Temporal | Natasha & Tú</title>
+    <title>Nexo Temporal | Natasha</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Raleway:wght@200;600&display=swap');
-
-        body { margin: 0; overflow: hidden; background: #0a0110; font-family: 'Raleway', sans-serif; color: white; }
-        
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 1000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; transition: opacity 2s;
-        }
-        .fragment-loader {
-            width: 40px; height: 40px; background: #ff3377;
-            animation: rotateFragment 2s infinite ease-in-out;
-            box-shadow: 0 0 20px #ff3377;
-        }
-        @keyframes rotateFragment {
-            0% { transform: rotateX(0deg) rotateY(0deg); }
-            50% { transform: rotateX(180deg) rotateY(180deg); opacity: 0.5; }
-            100% { transform: rotateX(360deg) rotateY(360deg); }
-        }
-        #load-txt { margin-top: 20px; letter-spacing: 5px; font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase;}
-
-        #ui-layer { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            pointer-events: none; z-index: 10; 
-            display: flex; flex-direction: column; justify-content: space-between; 
-            padding: 50px; box-sizing: border-box; 
-        }
-        
-        .header { opacity: 0; transform: translateY(-20px); transition: 2s; }
-        .header h1 { 
-            font-family: 'Cinzel Decorative', cursive; margin: 0; font-size: 3rem; 
-            color: #ffffff; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px #ff3377; 
-            letter-spacing: 5px; 
-        }
-        .header p { font-weight: 200; letter-spacing: 8px; color: rgba(255,255,255,0.7); margin-top: 5px; font-size: 12px; text-transform: uppercase;}
-        
-        .contador { 
-            position: absolute; top: 50px; right: 50px; 
-            background: rgba(0,0,0,0.5); padding: 15px 25px; 
-            border-radius: 2px; backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255,100,150,0.3); 
-            opacity: 0; transition: 2s; font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
-        }
-        .contador span { font-weight: 600; color: #ff3377; font-size: 16px; }
-
-        #caption-box {
-            position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
-            text-align: center; width: 60%; opacity: 0; transition: 1s;
-            font-size: 1.5rem; font-style: italic; font-weight: 200;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
-            line-height: 1.8; color: #ffebf2;
-        }
-
-        #instrucciones {
-            position: absolute; bottom: 30px; width: 100%; text-align: center;
-            color: rgba(255,255,255,0.3); font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
-            opacity: 0; transition: 3s;
-        }
+        body { margin: 0; overflow: hidden; background: #0a0110; font-family: sans-serif; color: white; }
+        #loader { position: fixed; width: 100%; height: 100%; background: #000; z-index: 1000; display: flex; justify-content: center; align-items: center; transition: 1s; }
+        #ui { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 10; text-align: center; padding: 50px; box-sizing: border-box; }
+        #caption { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); font-size: 1.5rem; font-style: italic; opacity: 0; transition: 0.5s; color: #ffebf2; }
     </style>
 </head>
 <body>
 
-<div id="loader">
-    <div class="fragment-loader"></div>
-    <div id="load-txt">Sincronizando el Nexo Temporal</div>
-</div>
+<div id="loader"><h2>CARGANDO JARDÍN SINCRONIZADO...</h2></div>
 
-<div id="ui-layer">
-    <div class="header" id="ui-header">
-        <h1>NATASHA</h1>
-        <p>Nuestro 30 de Octubre | Eternidad</p>
-    </div>
-    
-    <div class="contador" id="ui-contador">Nexos Sincronizados: <span id="found-count">0</span> / 5</div>
-    
-    <div id="caption-box"></div>
-
-    <div id="instrucciones">Utiliza el mouse para orbitar | Haz clic en los hongos nexo</div>
+<div id="ui">
+    <h1 style="letter-spacing: 10px;">NATASHA</h1>
+    <div id="caption"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 
 <script>
-let scene, camera, renderer, controls, raycaster, mouse;
-let nexus_hongos = [], deco_hongos = [], fireflies, groundMirror;
-let hongoModel, cespedModel;
-let foundNexuses = 0;
-let clock = new THREE.Clock();
-
-const foundCountUI = document.getElementById('found-count');
-const captionBox = document.getElementById('caption-box');
-
-// Textos de aniversario para Natasha (Día 30)
-const mensajesNexo = [
-    "Nuestra primera mirada... el inicio de todo. ❤️",
-    "Tu risa es la melodía que alegra mis días.",
-    "Cada 30 de Octubre confirmo que eres tú.",
-    "Gracias por cultivar este amor conmigo.",
-    "Te amo más allá de este mundo mágico."
-];
+let scene, camera, renderer, controls, hongos = [];
+const frases = ["Primer mirada ❤️", "Tu risa", "30 de Octubre", "Nuestro amor", "Siempre tú"];
 
 function init() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0a0110, 0.012);
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 30, 60);
 
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
-    camera.position.set(0, 60, 120); // Vista cinemática inicial alta
-
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.toneMapping = THREE.ReinhardToneMapping;
-    renderer.outputEncoding = THREE.sRGBEncoding;
     document.body.appendChild(renderer.domElement);
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.03;
-    controls.maxPolarAngle = Math.PI / 2 - 0.05; // No ver debajo del suelo
-
-    raycaster = new THREE.Raycaster();
-    mouse = new THREE.Vector2();
-
-    // 1. ILUMINACIÓN AMBIENTAL
-    scene.add(new THREE.AmbientLight(0x402040, 1));
-    scene.add(new THREE.HemisphereLight(0xff99cc, 0x0000ff, 0.8));
-
-    // 2. SUELO DE ESPEJO INFINITO
-    const mirrorGeo = new THREE.PlaneGeometry(800, 800);
-    groundMirror = new THREE.Reflector(mirrorGeo, {
-        clipBias: 0.003, textureWidth: window.innerWidth * window.devicePixelRatio,
-        textureHeight: window.innerHeight * window.devicePixelRatio,
-        color: 0x111111, recursion: 1
-    });
-    groundMirror.rotation.x = -Math.PI / 2;
-    groundMirror.position.y = -0.1;
-    scene.add(groundMirror);
-
-    // 3. LA CÚPULA VICTORIANA
-    const dome = new THREE.Mesh(
-        new THREE.SphereGeometry(100, 32, 20, 0, Math.PI * 2, 0, Math.PI / 2),
-        new THREE.MeshPhongMaterial({ color: 0x442244, wireframe: true, transparent: true, opacity: 0.05 })
-    );
-    scene.add(dome);
-
-    // 4. LUCIÉRNAGAS
-    const fGeo = new THREE.BufferGeometry();
-    const fPos = [];
-    for(let i=0; i<400; i++) fPos.push((Math.random()-0.5)*180, Math.random()*50, (Math.random()-0.5)*180);
-    fGeo.setAttribute('position', new THREE.Float32BufferAttribute(fPos, 3));
-    const fMat = new THREE.PointsMaterial({color: 0xfff59d, size: 0.6, transparent: true, blending: THREE.AdditiveBlending});
-    fireflies = new THREE.Points(fGeo, fMat);
-    scene.add(fireflies);
-
-    // 5. CARGAR MODELOS (Aquí está la composición)
-    const gltfLoader = new THREE.GLTFLoader();
-    let modelsLoaded = 0;
-
-    function checkStart() {
-        if(++modelsLoaded === 2) composeScene();
-    }
-
-    gltfLoader.load('assets/cesped.glb', (gltf) => {
-        cespedModel = gltf.scene;
-        checkStart();
-    });
-
-    gltfLoader.load('assets/hongo.glb', (gltf) => {
-        hongoModel = gltf.scene;
-        checkStart();
-    });
-}
-
-function composeScene() {
-    // A. Bosque de Césped (50 instancias)
-    for(let i=0; i<50; i++) {
-        const c = cespedModel.clone();
-        c.position.set((Math.random()-0.5)*160, 0, (Math.random()-0.5)*160);
-        c.scale.setScalar(Math.random()*2 + 1.5);
-        c.rotation.y = Math.random()*Math.PI;
-        scene.add(c);
-    }
-
-    // B. Hongos de Decoración (30 instancias)
-    for(let i=0; i<30; i++) {
-        const g = new THREE.Group();
-        const h = hongoModel.clone();
-        h.scale.setScalar(2); // Más pequeños que los Nexo
-        g.add(h);
-        
-        // Brillo suave azul/púrpura
-        const l = new THREE.PointLight(0x00ffff, 1, 10);
-        l.position.y = 3;
-        g.add(l);
-
-        g.position.set((Math.random()-0.5)*160, 0, (Math.random()-0.5)*160);
-        scene.add(g);
-        deco_hongos.push(g);
-    }
-
-    // C. Los 5 HONGOS NEXO (Tus Recuerdos)
-    for(let i=0; i<5; i++) {
-        const g = new THREE.Group();
-        const h = hongoModel.clone();
-        h.scale.setScalar(5); // Grandes y protagonistas
-        
-        // Forzar material neón para resaltar (AAA Art Ambition)
-        h.traverse((child) => {
-            if (child.isMesh) {
-                child.material = new THREE.MeshPhongMaterial({
-                    color: 0xffffff, emissive: 0xff3377, emissiveIntensity: 2,
-                    shininess: 100, flatShading: true
-                });
-            }
-        });
-        g.add(h);
-
-        // Luz neón rosa intensa
-        const l = new THREE.PointLight(0xff3377, 4, 20);
-        l.position.y = 6;
-        g.add(l);
-
-        // Posición circular
-        const angle = (i/5) * Math.PI*2;
-        g.position.set(Math.cos(angle)*35, 0, Math.sin(angle)*35);
-        g.userData = { msg: mensajesNexo[i], active: false };
-        
-        scene.add(g);
-        nexus_hongos.push(g);
-    }
-
-    startExperience();
-}
-
-function startExperience() {
-    // Quitar loader
-    document.getElementById('loader').style.opacity = '0';
-    setTimeout(()=>document.getElementById('loader').remove(), 2000);
     
-    // GSAP Intro cinematográfica
-    gsap.to(camera.position, {y: 20, z: 80, duration: 5, ease: "power2.inOut"});
-    gsap.to('#ui-header', { opacity: 1, y: 0, duration: 2, delay: 2 });
-    gsap.to('#ui-contador', { opacity: 1, duration: 2, delay: 3 });
-    gsap.to('#instrucciones', { opacity: 1, duration: 2, delay: 4 });
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const light = new THREE.PointLight(0xff3377, 2, 100);
+    light.position.set(0, 20, 10);
+    scene.add(light);
 
-    window.addEventListener('click', onClick);
+    // Suelo
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(50, 32), new THREE.MeshStandardMaterial({color: 0x111111}));
+    floor.rotation.x = -Math.PI/2;
+    scene.add(floor);
+
+    // Crear "Hongos" con esferas (Para que no falle por falta de archivos)
+    for(let i=0; i<5; i++) {
+        const hongo = new THREE.Group();
+        
+        // Sombrero del hongo
+        const head = new THREE.Mesh(
+            new THREE.SphereGeometry(2, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+            new THREE.MeshPhongMaterial({color: 0xff3377, emissive: 0x550022})
+        );
+        hongo.add(head);
+
+        // Tallo
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 3), new THREE.MeshPhongMaterial({color: 0xeeeeee}));
+        stem.position.y = -1.5;
+        hongo.add(stem);
+
+        const angle = (i/5) * Math.PI * 2;
+        hongo.position.set(Math.cos(angle)*20, 1.5, Math.sin(angle)*20);
+        hongo.userData = { msg: frases[i] };
+        scene.add(hongo);
+        hongos.push(hongo);
+    }
+
+    document.getElementById('loader').style.opacity = '0';
+    setTimeout(() => document.getElementById('loader').remove(), 1000);
+
+    window.addEventListener('click', onDocClick);
     animate();
 }
 
-function onClick(e) {
+function onDocClick(e) {
     const mouse = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
     const ray = new THREE.Raycaster();
     ray.setFromCamera(mouse, camera);
-    const intersects = ray.intersectObjects(nexus_hongos, true);
+    const intersects = ray.intersectObjects(hongos, true);
     
     if(intersects.length > 0) {
-        let obj = intersects[0].object;
-        // Encontrar el grupo padre del Nexo
-        while(obj.parent && obj.type !== 'Group') obj = obj.parent;
+        let obj = intersects[0].object.parent;
+        const cap = document.getElementById('caption');
+        cap.innerText = obj.userData.msg;
+        cap.style.opacity = '1';
         
-        if(obj.userData.active) return; // Ya activado
+        gsap.to(camera.position, {
+            x: obj.position.x * 1.5, y: 10, z: obj.position.z * 1.5, duration: 1.5,
+            onUpdate: () => camera.lookAt(obj.position)
+        });
 
-        revealMemory(obj);
+        setTimeout(() => { cap.style.opacity = '0'; }, 3000);
     }
-}
-
-function revealMemory(hongoNexus) {
-    hongoNexus.userData.active = true;
-    foundNexuses++;
-    foundCountUI.innerText = foundNexuses;
-
-    const cap = document.getElementById('caption-box');
-    cap.innerText = hongoNexus.userData.msg;
-    
-    // UI Feedback
-    gsap.to(cap, { opacity: 1, y: -20, duration: 1 });
-    gsap.to('#instrucciones', { opacity: 0, duration: 1 });
-
-    const tl = gsap.timeline();
-    
-    // 1. Viaje cinematográfico al hongo
-    tl.to(camera.position, {
-        x: hongoNexus.position.x * 1.3, y: 12, z: hongoNexus.position.z * 1.3, 
-        duration: 2, ease: "power3.inOut",
-        onUpdate: () => camera.lookAt(hongoNexus.position.x, 6, hongoNexus.position.z)
-    });
-
-    // 2. Activación visual (AAA Bloom effect proxy)
-    const l = hongoNexus.children[1];
-    tl.to(l, { intensity: 20, duration: 0.5 }); // Explosión de luz rosa
-    tl.to(hongoNexus.scale, { x: 1.2, y: 1.2, z: 1.2, duration: 0.5, yoyo: true, repeat: 1 }, "-=0.5");
-
-    // 3. Regresar cámara suavemente
-    tl.to(cap, { opacity: 0, y: 0, duration: 1 }, "+=4");
-    tl.to(camera.position, {x:0, y:20, z:80, duration: 3, ease: "power2.inOut"}, "-=1");
-    tl.to(l, { intensity: 4, duration: 1 }, "-=1");
-    
-    tl.call(() => {
-        gsap.to('#instrucciones', { opacity: 1, duration: 2 });
-    });
 }
 
 function animate() {
     requestAnimationFrame(animate);
-    const t = clock.getElapsedTime();
-
-    // Movimiento orgánico de luciérnagas
-    if(fireflies) {
-        fireflies.position.y = Math.sin(t * 0.3) * 3;
-        fireflies.rotation.y += 0.0003;
-    }
-
-    // Animación de Hongos de Decoración (Flotando suave)
-    deco_hongos.forEach((h, i) => {
-        h.position.y = Math.sin(t*0.5 + i) * 0.3;
-        h.children[1].intensity = 1 + Math.sin(t*2 + i) * 0.5;
-    });
-
-    // Animación de Hongos Nexo (Pulsando)
-    nexus_hongos.forEach((h, i) => {
-        if(!h.userData.active) {
-            h.position.y = Math.sin(t + i) * 0.2;
-            h.children[1].intensity = 4 + Math.sin(t*3 + i) * 2;
-        } else {
-             h.rotation.y += 0.02; // Girar rápido si ya está activado
-        }
-    });
-
+    hongos.forEach((h, i) => h.position.y = 1.5 + Math.sin(Date.now()*0.002 + i) * 0.5);
     controls.update();
     renderer.render(scene, camera);
 }
 
 init();
-
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    if(groundMirror) {
-        groundMirror.getRenderTarget().setSize(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio);
-    }
-});
 </script>
 </body>
 </html>
