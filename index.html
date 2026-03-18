@@ -3,41 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexo Natasha | Edición Ultra Rendimiento</title>
+    <title>Nexo 3D | Mapa Profesional</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Raleway:wght@200;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Raleway:wght@300;600&display=swap');
+        
         body { margin: 0; overflow: hidden; background: #050108; font-family: 'Raleway', sans-serif; color: white; }
         
         /* Pantalla de Carga */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 1000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; transition: opacity 1.5s;
+            justify-content: center; align-items: center; transition: opacity 1s;
         }
-        .spinner { width: 50px; height: 50px; border: 3px solid rgba(255,51,119,0.2); border-top-color: #ff3377; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .bar-container { width: 200px; height: 2px; background: rgba(255,255,255,0.1); margin-top: 20px; }
+        .bar { width: 0%; height: 100%; background: #ff3377; box-shadow: 0 0 10px #ff3377; transition: width 0.3s; }
 
         /* Interfaz */
         #ui { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 10; padding: 40px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
-        .header h1 { font-family: 'Cinzel Decorative', cursive; font-size: 2.8rem; letter-spacing: 6px; margin: 0; text-shadow: 0 0 20px #ff3377; opacity: 0; }
-        #caption { text-align: center; font-size: 1.8rem; font-style: italic; opacity: 0; transition: 1s; color: #ffebf2; text-shadow: 0 0 15px rgba(0,0,0,0.8); margin-bottom: 100px; }
-        .footer { text-align: center; color: rgba(255,255,255,0.3); font-size: 10px; letter-spacing: 4px; text-transform: uppercase; }
+        .header h1 { font-family: 'Cinzel Decorative', cursive; font-size: 2.5rem; letter-spacing: 5px; margin: 0; text-shadow: 0 0 20px #ff3377; }
+        #caption { text-align: center; font-size: 1.5rem; font-style: italic; opacity: 0; transition: 0.8s; color: #ffebf2; margin-bottom: 80px; }
+        
+        /* Alerta de Error */
+        #error-log { position: fixed; bottom: 10px; left: 10px; color: #ff4444; font-size: 10px; font-family: monospace; pointer-events: none; }
     </style>
 </head>
 <body>
 
 <div id="loader">
-    <div class="spinner"></div>
-    <p style="margin-top: 20px; letter-spacing: 4px; font-size: 10px;">SINCRONIZANDO INSTANCIAS 3D...</p>
+    <h2 id="load-status" style="letter-spacing: 5px; font-size: 12px;">INICIANDO SISTEMA 3D</h2>
+    <div class="bar-container"><div class="bar" id="load-bar"></div></div>
 </div>
 
+<div id="error-log"></div>
+
 <div id="ui">
-    <div class="header" id="header">
+    <div class="header">
         <h1>NATASHA</h1>
-        <p style="color: #ff3377; letter-spacing: 5px; font-size: 12px;">30 DE OCTUBRE | JARDÍN ETERNO</p>
+        <p style="color: #ff3377; letter-spacing: 5px; font-size: 10px;">MAPA DE RECUERDOS INTERACTIVO</p>
     </div>
     <div id="caption"></div>
-    <div class="footer">Explora con el mouse • Toca los hongos brillantes</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
@@ -48,14 +52,16 @@
 <script>
 let scene, camera, renderer, controls, nexus_hongos = [];
 const clock = new THREE.Clock();
-const frases = ["Nuestra primera mirada", "Tu risa mágica", "Ese 30 de Octubre", "Nuestro refugio", "Te amo por siempre"];
+const errorLog = document.getElementById('error-log');
 
+// 1. Configuración de Escena
 function init() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050108, 0.012);
+    scene.background = new THREE.Color(0x050108);
+    scene.fog = new THREE.FogExp2(0x050108, 0.015);
 
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 1, 1000);
-    camera.position.set(0, 50, 100);
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 40, 100);
 
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -67,109 +73,114 @@ function init() {
     controls.enableDamping = true;
     controls.maxPolarAngle = Math.PI / 2 - 0.1;
 
-    // Iluminación
-    scene.add(new THREE.AmbientLight(0x402040, 1.5));
-    const mainLight = new THREE.PointLight(0xff3377, 2, 200);
-    mainLight.position.set(0, 50, 0);
-    scene.add(mainLight);
+    // Luces
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const sun = new THREE.PointLight(0xff3377, 2, 200);
+    sun.position.set(0, 50, 20);
+    scene.add(sun);
 
-    // Suelo de Vidrio (Falso Reflejo)
+    // Suelo
     const floor = new THREE.Mesh(
         new THREE.CircleGeometry(150, 64),
-        new THREE.MeshStandardMaterial({ color: 0x050505, metalness: 0.9, roughness: 0.1 })
+        new THREE.MeshStandardMaterial({ color: 0x080808, metalness: 0.8, roughness: 0.2 })
     );
     floor.rotation.x = -Math.PI / 2;
     scene.add(floor);
 
-    // Domo
-    const dome = new THREE.Mesh(
-        new THREE.SphereGeometry(160, 32, 20, 0, Math.PI*2, 0, Math.PI/2),
-        new THREE.MeshBasicMaterial({ color: 0xff3377, wireframe: true, transparent: true, opacity: 0.05 })
-    );
-    scene.add(dome);
+    loadModels();
+}
 
-    // CARGA MASIVA CON INSTANCING
+// 2. Cargador de Modelos con Diagnóstico
+function loadModels() {
     const loader = new THREE.GLTFLoader();
-    let loadedCount = 0;
+    const bar = document.getElementById('load-bar');
+    const status = document.getElementById('load-status');
+    let loaded = 0;
 
-    const checkLoad = () => {
-        if (++loadedCount === 2) {
-            document.getElementById('loader').style.opacity = '0';
+    const updateBar = (p) => { bar.style.width = p + '%'; };
+
+    // Cargar Césped
+    loader.load('assets/cesped.glb', 
+        (gltf) => {
+            console.log("Césped cargado OK");
+            createInstances(gltf, 600, 200, 1.5);
+            loaded++;
+            checkFinished();
+        },
+        (xhr) => { updateBar((xhr.loaded / xhr.total * 50)); },
+        (err) => { logError("Error en assets/cesped.glb: No se encuentra el archivo."); }
+    );
+
+    // Cargar Hongos
+    loader.load('assets/hongo.glb', 
+        (gltf) => {
+            console.log("Hongo cargado OK");
+            createInstances(gltf, 80, 150, 0.8);
+            createNexus(gltf);
+            loaded++;
+            checkFinished();
+        },
+        (xhr) => { updateBar(50 + (xhr.loaded / xhr.total * 50)); },
+        (err) => { logError("Error en assets/hongo.glb: No se encuentra el archivo."); }
+    );
+
+    function checkFinished() {
+        if(loaded === 2) {
+            status.innerText = "SISTEMA LISTO";
             setTimeout(() => {
-                document.getElementById('loader').remove();
-                gsap.to('#header', { opacity: 1, duration: 2 });
-                gsap.to(camera.position, { y: 20, z: 70, duration: 4, ease: "power2.inOut" });
-            }, 1000);
+                document.getElementById('loader').style.opacity = '0';
+                gsap.to(camera.position, { y: 20, z: 70, duration: 3, ease: "power2.inOut" });
+            }, 500);
         }
-    };
-
-    // 1. Instancias de Césped (800 unidades)
-    loader.load('assets/cesped.glb', (gltf) => {
-        const mesh = findMesh(gltf.scene);
-        const instancedGrass = new THREE.InstancedMesh(mesh.geometry, mesh.material, 800);
-        const dummy = new THREE.Object3D();
-
-        for (let i = 0; i < 800; i++) {
-            dummy.position.set((Math.random()-0.5)*250, 0, (Math.random()-0.5)*250);
-            dummy.rotation.y = Math.random() * Math.PI;
-            dummy.scale.setScalar(Math.random()*2 + 1);
-            dummy.updateMatrix();
-            instancedGrass.setMatrixAt(i, dummy.matrix);
-        }
-        scene.add(instancedGrass);
-        checkLoad();
-    });
-
-    // 2. Instancias de Hongos Decorativos (150 unidades)
-    loader.load('assets/hongo.glb', (gltf) => {
-        const mesh = findMesh(gltf.scene);
-        const instancedFungi = new THREE.InstancedMesh(mesh.geometry, mesh.material, 150);
-        const dummy = new THREE.Object3D();
-
-        for (let i = 0; i < 150; i++) {
-            dummy.position.set((Math.random()-0.5)*220, 0, (Math.random()-0.5)*220);
-            dummy.rotation.y = Math.random() * Math.PI;
-            dummy.scale.setScalar(Math.random()*1 + 0.5);
-            dummy.updateMatrix();
-            instancedFungi.setMatrixAt(i, dummy.matrix);
-        }
-        scene.add(instancedFungi);
-
-        // 3. Crear los 5 HONGOS NEXO (Interactivos)
-        for (let i = 0; i < 5; i++) {
-            const nexus = gltf.scene.clone();
-            const angle = (i / 5) * Math.PI * 2;
-            nexus.position.set(Math.cos(angle)*40, 0, Math.sin(angle)*40);
-            nexus.scale.setScalar(4);
-            
-            // Luz individual para cada nexo
-            const pLight = new THREE.PointLight(0xff3377, 5, 25);
-            pLight.position.y = 5;
-            nexus.add(pLight);
-            
-            nexus.userData = { msg: frases[i] };
-            scene.add(nexus);
-            nexus_hongos.push(nexus);
-        }
-        checkLoad();
-    });
-
-    window.addEventListener('click', onSceneClick);
+    }
 }
 
-function findMesh(object) {
+// 3. Optimizador (Instancing)
+function createInstances(gltf, count, range, size) {
     let mesh;
-    object.traverse(child => { if (child.isMesh) mesh = child; });
-    return mesh;
+    gltf.scene.traverse(child => { if(child.isMesh) mesh = child; });
+    
+    const instanced = new THREE.InstancedMesh(mesh.geometry, mesh.material, count);
+    const dummy = new THREE.Object3D();
+
+    for(let i=0; i<count; i++) {
+        dummy.position.set((Math.random()-0.5)*range, 0, (Math.random()-0.5)*range);
+        dummy.rotation.y = Math.random()*Math.PI;
+        dummy.scale.setScalar(Math.random()*size + size/2);
+        dummy.updateMatrix();
+        instanced.setMatrixAt(i, dummy.matrix);
+    }
+    scene.add(instanced);
 }
 
-function onSceneClick(e) {
+// 4. Los 5 Hongos Interactivos
+function createNexus(gltf) {
+    const frases = ["Esa primera mirada ❤️", "Tu risa que ilumina todo", "Nuestro 30 de Octubre", "Cada momento a tu lado", "Te amo, Natasha"];
+    
+    for(let i=0; i<5; i++) {
+        const nexo = gltf.scene.clone();
+        const angle = (i/5) * Math.PI * 2;
+        nexo.position.set(Math.cos(angle)*35, 0, Math.sin(angle)*35);
+        nexo.scale.setScalar(4);
+        
+        const light = new THREE.PointLight(0xff3377, 5, 20);
+        light.position.y = 5;
+        nexo.add(light);
+        
+        nexo.userData = { msg: frases[i] };
+        scene.add(nexo);
+        nexus_hongos.push(nexo);
+    }
+}
+
+// Interacción
+window.addEventListener('click', (e) => {
     const mouse = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(nexus_hongos, true);
 
-    if (intersects.length > 0) {
+    if(intersects.length > 0) {
         let obj = intersects[0].object;
         while(obj.parent && !obj.userData.msg) obj = obj.parent;
 
@@ -178,40 +189,43 @@ function onSceneClick(e) {
         cap.style.opacity = '1';
 
         gsap.to(camera.position, {
-            x: obj.position.x * 1.4, y: 12, z: obj.position.z * 1.4,
-            duration: 2, ease: "power3.inOut",
-            onUpdate: () => camera.lookAt(obj.position.x, 5, obj.position.z)
+            x: obj.position.x * 1.5, y: 10, z: obj.position.z * 1.5,
+            duration: 1.5, onUpdate: () => camera.lookAt(obj.position.x, 5, obj.position.z)
         });
 
         setTimeout(() => {
             cap.style.opacity = '0';
-            gsap.to(camera.position, { x: 0, y: 20, z: 70, duration: 2 });
+            gsap.to(camera.position, { x: 0, y: 20, z: 70, duration: 1.5 });
         }, 4000);
     }
+});
+
+function logError(msg) {
+    errorLog.innerHTML += `> ${msg}<br>`;
+    console.error(msg);
+    // Si falla, al menos ponemos un cubo para saber que Three.js vive
+    const box = new THREE.Mesh(new THREE.BoxGeometry(5,5,5), new THREE.MeshBasicMaterial({color: 0xff0000}));
+    scene.add(box);
 }
 
 function animate() {
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
-    
-    // Animación de los Nexos (Pulsación)
     nexus_hongos.forEach((n, i) => {
         n.position.y = Math.sin(t + i) * 0.2;
-        n.children.forEach(c => { if(c.isPointLight) c.intensity = 4 + Math.sin(t*3 + i)*2; });
     });
-
     controls.update();
     renderer.render(scene, camera);
 }
 
-init();
-animate();
-
 window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+init();
+animate();
 </script>
 </body>
 </html>
