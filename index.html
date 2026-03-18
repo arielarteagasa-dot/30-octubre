@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Santuario del 30 | Natasha & Tú</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family Cinzel+Decorative:wght@700&family=Raleway:wght@300;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Raleway:wght@300;600&display=swap');
 
         body { margin: 0; overflow: hidden; background: #0a0110; font-family: 'Raleway', sans-serif; color: white; }
         
@@ -21,16 +21,15 @@
         /* Interfaz de Usuario (UI) */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; padding: 30px; box-sizing: border-box; }
         
-        .header h1 { font-family: 'Cinzel Decorative', cursive; margin: 0; font-size: 2.5rem; color: #ff99cc; text-shadow: 0 0 15px #ff4d94; letter-spacing: 3px; }
+        .header h1 { font-family: 'Cinzel Decorative', cursive; margin: 0; font-size: 2.5rem; color: #ff99cc; text-shadow: 0 0 15px #ff4d94; letter-spacing: 3px; opacity: 0; transition: 2s; }
         
-        .contador { position: absolute; top: 30px; right: 30px; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); }
+        .contador { position: absolute; top: 30px; right: 30px; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); opacity: 0; transition: 2s; }
         .contador span { font-weight: 600; color: #ff99cc; }
 
-        #final-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%; opacity: 0; transition: 2s; }
+        #final-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%; opacity: 0; transition: 2s; pointer-events: none;}
         #final-msg h2 { font-family: 'Cinzel Decorative', cursive; font-size: 3rem; color: white; text-shadow: 0 0 30px #ff4d94; margin-bottom: 10px; }
         #final-msg p { font-size: 1.2rem; color: rgba(255,255,255,0.8); }
 
-        /* Botón de Interacción al tocar orbes */
         #interact-txt { position: absolute; bottom: 150px; width: 100%; text-align: center; color: #ff99cc; font-size: 18px; text-transform: uppercase; letter-spacing: 4px; opacity: 0; transition: 0.5s; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
     </style>
@@ -43,14 +42,14 @@
 </div>
 
 <div id="ui-layer">
-    <div class="header">
+    <div class="header" id="ui-header">
         <h1>NATASHA</h1>
         <p>NUESTRO 30 DE OCTUBRE</p>
     </div>
     
-    <div class="contador">Recuerdos encontrados: <span id="found-count">0</span> / 5</div>
+    <div class="contador" id="ui-contador">Recuerdos activados: <span id="found-count">0</span> / 5</div>
     
-    <div id="interact-txt">Toca el orbe de memoria</div>
+    <div id="interact-txt">Toca un orbe de luz</div>
 
     <div id="final-msg">
         <h2>FELIZ ANIVERSARIO</h2>
@@ -59,9 +58,8 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r129/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.129/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.129/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.129/examples/js/controls/OrbitControls.js"></script>
 
 <script>
 // CONFIGURACIÓN ESCENA BÁSICA
@@ -73,44 +71,41 @@ const loaderPage = document.getElementById('loader');
 const foundCountUI = document.getElementById('found-count');
 const interactTxt = document.getElementById('interact-txt');
 
-// DATOS DE LOS RECUERDOS (Cambia las fotos y textos)
+// DATOS DE LOS RECUERDOS (Solo texto por ahora)
 const recuerdosInfo = [
-    { foto: 'foto1.jpg', texto: 'Nuestra primera selfie juntos. ❤️' },
-    { foto: 'foto2.jpg', texto: 'El día que adoptamos a nuestro perrito.' },
-    { foto: 'foto3.jpg', texto: 'Ese viaje increíble a la playa.' },
-    { foto: 'foto4.jpg', texto: 'Celebrando tu último cumpleaños.' },
-    { foto: 'foto5.jpg', texto: 'Cuando supimos que esto era para siempre.' }
+    { texto: 'Nuestra primera selfie juntos. ❤️' },
+    { texto: 'El día que adoptamos a nuestro perrito.' },
+    { texto: 'Ese viaje increíble a la playa.' },
+    { texto: 'Celebrando tu último cumpleaños.' },
+    { texto: 'Cuando supimos que esto era para siempre.' }
 ];
 
 function init() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0a0110, 0.03); // Niebla atmosférica
+    scene.fog = new THREE.FogExp2(0x0a0110, 0.03); 
 
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 10, 30); // Cámara inicial alta
+    camera.position.set(0, 10, 40); 
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping; // Tonos realistas
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
     document.body.appendChild(renderer.domElement);
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.minDistance = 5;
-    controls.maxDistance = 50;
-    controls.maxPolarAngle = Math.PI / 2; // No ver debajo del suelo
+    controls.maxDistance = 60;
+    controls.maxPolarAngle = Math.PI / 2; 
 
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
 
     // 1. ILUMINACIÓN AMBIENTAL MÁGICA
-    const ambientLight = new THREE.AmbientLight(0x404040, 1); // Luz base suave
-    scene.add(ambientLight);
-
-    const hemiLight = new THREE.HemisphereLight(0xff99cc, 0x0000ff, 0.6); // Cielo rosa, suelo azul
-    scene.add(hemiLight);
+    scene.add(new THREE.AmbientLight(0x404040, 1));
+    scene.add(new THREE.HemisphereLight(0xff99cc, 0x0000ff, 0.6));
 
     // 2. FONDOS Y PARTÍCULAS (Nebulosa)
     const starGeo = new THREE.BufferGeometry();
@@ -123,69 +118,62 @@ function init() {
     // 3. EL TEMPLO (Suelo de runas)
     const floorGeo = new THREE.CircleGeometry(15, 64);
     const floorMat = new THREE.MeshStandardMaterial({ 
-        color: 0x101010, 
-        metalness: 0.8, 
-        roughness: 0.2,
-        emissive: 0xff0077, 
-        emissiveIntensity: 0.1 // Brillo sutil de las runas
+        color: 0x101010, metalness: 0.8, roughness: 0.2,
+        emissive: 0xff0077, emissiveIntensity: 0.1 
     });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
     scene.add(floor);
 
-    // 4. CREAR ORBES DE MEMORIA (5 orbes interactivos)
-    const orbeGeo = new THREE.SphereGeometry(1, 32, 32);
-    const texLoader = new THREE.TextureLoader();
+    // 4. CREAR ORBES DE MEMORIA (Solo luz y cristal)
+    const orbeGeo = new THREE.IcosahedronGeometry(1, 1); // Cristales geométricos
 
     for(let i=0; i<5; i++) {
-        const group = new THREE.Group();
-
-        // El orbe brillante (efecto cristal)
         const mat = new THREE.MeshPhongMaterial({
-            color: 0xff99cc, emissive: 0xff0044, emissiveIntensity: 1,
-            transparent: true, opacity: 0.5, shininess: 100, flatShading: false
+            color: 0xffffff, emissive: 0xff99cc, emissiveIntensity: 1,
+            transparent: true, opacity: 0.7, shininess: 100, flatShading: true
         });
         const mesh = new THREE.Mesh(orbeGeo, mat);
         
-        // La foto dentro del orbe (invisible hasta tocar)
-        const photoGeo = new THREE.PlaneGeometry(1.2, 1.8);
-        const photoMat = new THREE.MeshBasicMaterial({ 
-            map: texLoader.load(recuerdosInfo[i].foto), 
-            side: THREE.DoubleSide, transparent: true, opacity: 0 
-        });
-        const photoMesh = new THREE.Mesh(photoGeo, photoMat);
-        
-        group.add(mesh);
-        group.add(photoMesh);
-
-        // Posición circular alrededor del templo
         const angle = (i / 5) * Math.PI * 2;
-        group.position.set(Math.cos(angle) * 12, 3, Math.sin(angle) * 12);
-        group.userData = { id: i, found: false, texto: recuerdosInfo[i].texto };
+        mesh.position.set(Math.cos(angle) * 12, 3, Math.sin(angle) * 12);
+        mesh.userData = { id: i, found: false, texto: recuerdosInfo[i].texto };
         
-        scene.add(group);
-        orbes.push(group);
+        scene.add(mesh);
+        orbes.push(mesh);
     }
 
-    // 5. CARGAR MODELO FINAL (Anillo de diamantes desde Sketchfab)
-    // Usamos un modelo público de Sketchfab cargado mediante GLTFLoader
-    const gltfLoader = new THREE.GLTFLoader();
-    // URL de ejemplo de un modelo GLTF de un anillo
-    const urlModelo = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/GlamVelvetSofa/glTF-Binary/GlamVelvetSofa.glb'; // Cambia por la URL real de tu anillo/regalo
+    // 5. CREAR MODELO FINAL MANUALMENTE (Anillo de diamantes programado)
+    finalModel = new THREE.Group();
+    
+    // El Aro Dorado
+    const torusGeo = new THREE.TorusGeometry(2, 0.2, 16, 100);
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.1 });
+    const ringAro = new THREE.Mesh(torusGeo, goldMat);
+    finalModel.add(ringAro);
 
-    gltfLoader.load(urlModelo, (gltf) => {
-        finalModel = gltf.scene;
-        finalModel.scale.set(0, 0, 0); // Oculto al inicio
-        finalModel.position.set(0, 1, 0); // En el pedestal central
-        scene.add(finalModel);
-
-        // Quitar loader cuando todo esté cargado
-        setTimeout(() => {
-            loaderPage.style.opacity = '0';
-            setTimeout(() => loaderPage.remove(), 1000);
-            interactTxt.style.opacity = '1';
-        }, 1500);
+    // El Diamante Central
+    const diamondGeo = new THREE.IcosahedronGeometry(0.6, 0);
+    const diamondMat = new THREE.MeshPhongMaterial({ 
+        color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.5,
+        transparent: true, opacity: 0.9, shininess: 100, flatShading: true 
     });
+    const diamond = new THREE.Mesh(diamondGeo, diamondMat);
+    diamond.position.y = 2.2;
+    finalModel.add(diamond);
+
+    finalModel.scale.set(0, 0, 0); // Oculto al inicio
+    finalModel.position.set(0, 1, 0); 
+    scene.add(finalModel);
+
+    // Quitar loader inmediatamente
+    setTimeout(() => {
+        loaderPage.style.opacity = '0';
+        setTimeout(() => loaderPage.remove(), 1000);
+        document.getElementById('ui-header').style.opacity = '1';
+        document.getElementById('ui-contador').style.opacity = '1';
+        interactTxt.style.opacity = '1';
+    }, 1000);
 
     animate();
 }
@@ -198,55 +186,41 @@ function onDocumentMouseDown(event) {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(orbes, true); // Interectar con grupos
+    const intersects = raycaster.intersectObjects(orbes);
 
     if (intersects.length > 0) {
-        // Encontrar el grupo del orbe clickeado
-        let currentGroup = intersects[0].object;
-        while(currentGroup.type !== 'Group') currentGroup = currentGroup.parent;
-        
-        playMemory(currentGroup);
+        playMemory(intersects[0].object);
     }
 }
 
 // SECUENCIA AL TOCAR UN ORBE
-function playMemory(orbeGroup) {
-    if(orbeGroup.userData.found) return; // Ya encontrado
+function playMemory(orbeMesh) {
+    if(orbeMesh.userData.found) return; // Ya encontrado
 
-    orbeGroup.userData.found = true;
+    orbeMesh.userData.found = true;
     foundMemories++;
     foundCountUI.innerText = foundMemories;
     interactTxt.style.opacity = '0';
-
-    const photoMesh = orbeGroup.children[1];
-    const orbeMesh = orbeGroup.children[0];
 
     // Animación Cinematográfica con GSAP
     const tl = gsap.timeline();
     
     // 1. Viaje de cámara al orbe
     tl.to(camera.position, {
-        x: orbeGroup.position.x * 1.3,
-        y: orbeGroup.position.y + 0.5,
-        z: orbeGroup.position.z * 1.3,
+        x: orbeMesh.position.x * 1.3,
+        y: orbeMesh.position.y + 0.5,
+        z: orbeMesh.position.z * 1.3,
         duration: 1.5,
         ease: "power2.inOut",
-        onUpdate: () => camera.lookAt(orbeGroup.position)
+        onUpdate: () => camera.lookAt(orbeMesh.position)
     });
 
-    // 2. Revelar foto y apagar brillo del orbe
-    tl.to(orbeMesh.material, { opacity: 0.1, duration: 0.5 }, "-=0.5");
-    tl.to(photoMesh.material, { opacity: 1, duration: 1 }, "-=0.3");
+    // 2. Activar el orbe (Cambio de color intenso)
+    tl.to(orbeMesh.material.color, { r: 1, g: 0, b: 0.3, duration: 0.5 }); // Rojo intenso
+    tl.to(orbeMesh.material, { emissiveIntensity: 5, opacity: 1, duration: 0.5 }, "-=0.5");
 
-    // 3. Mostrar texto (Podrías integrar audio aquí)
-    tl.call(() => {
-        // alert(orbeGroup.userData.texto); // Reemplazar por UI elegante si quieres
-    });
-
-    // 4. Regresar cámara a vista general
-    tl.to(camera.position, { x: 0, y: 10, z: 30, duration: 2, ease: "power2.inOut" }, "+=2");
-    tl.to(photoMesh.material, { opacity: 0, duration: 0.5 }, "-=2");
-    tl.to(orbeMesh.material, { opacity: 0.5, duration: 0.5 }, "-=2");
+    // 3. Regresar cámara a vista general
+    tl.to(camera.position, { x: 0, y: 10, z: 40, duration: 2, ease: "power2.inOut" }, "+=1.5");
     
     tl.call(() => {
         interactTxt.style.opacity = '1';
@@ -260,26 +234,25 @@ function checkFinalCondition() {
         interactTxt.style.opacity = '0';
         window.removeEventListener('click', onDocumentMouseDown); // Desactivar clics en orbes
 
-        // SECUENCIA FINAL
         const tlFinal = gsap.timeline();
 
         // 1. Cámara al centro del pedestal
-        tlFinal.to(camera.position, { x: 0, y: 3, z: 10, duration: 3, ease: "power3.inOut" });
+        tlFinal.to(camera.position, { x: 0, y: 3, z: 15, duration: 3, ease: "power3.inOut" });
 
-        // 2. Los orbes viajan al centro y explotan
+        // 2. Los orbes viajan al centro
         orbes.forEach(orbe => {
-            tlFinal.to(orbe.position, { x: 0, y: 1, z: 0, duration: 1.5 }, "-=2");
-            tlFinal.to(orbe.scale, { x: 0, y: 0, z: 0, duration: 0.5 }, "-=0.5");
+            tlFinal.to(orbe.position, { x: 0, y: 1, z: 0, duration: 1.5 }, "-=2.5");
+            tlFinal.to(orbe.scale, { x: 0, y: 0, z: 0, duration: 0.5 }, "-=1");
         });
 
-        // 3. APARECE EL REGALO (Anillo 3D)
-        tlFinal.to(finalModel.scale, { x: 1, y: 1, z: 1, duration: 2, ease: "back.out(1.7)" }, "+=0.5");
+        // 3. APARECE EL REGALO (Anillo 3D manual)
+        tlFinal.to(finalModel.scale, { x: 1, y: 1, z: 1, duration: 2, ease: "back.out(1.7)" });
         
         // 4. Activar mensaje final y controles automáticos
         tlFinal.call(() => {
             document.getElementById('final-msg').style.opacity = '1';
             controls.autoRotate = true; // El regalo gira solo
-            controls.autoRotateSpeed = 2;
+            controls.autoRotateSpeed = 3;
         });
     }
 }
@@ -287,7 +260,7 @@ function checkFinalCondition() {
 // BUCLE DE ANIMACIÓN (Renders por segundo)
 function animate() {
     requestAnimationFrame(animate);
-    controls.update(); // Necesario para damping y autoRotate
+    controls.update(); 
 
     const time = Date.now() * 0.001;
     
@@ -295,13 +268,12 @@ function animate() {
     orbes.forEach((orbe, i) => {
         if(!orbe.userData.found) {
             orbe.position.y = 3 + Math.sin(time + i) * 0.3;
-            orbe.children[0].material.emissiveIntensity = 1 + Math.sin(time * 2 + i) * 0.5;
+            orbe.rotation.y += 0.01;
+            orbe.children[0]?.material && (orbe.children[0].material.emissiveIntensity = 1 + Math.sin(time * 2 + i) * 0.5);
+        } else {
+             orbe.rotation.y += 0.05; // Girar rápido si ya está encontrado
         }
     });
-
-    if(finalModel && foundMemories === 5) {
-        finalModel.rotation.y += 0.01; // Giro extra del regalo
-    }
 
     renderer.render(scene, camera);
 }
