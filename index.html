@@ -3,378 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexo de la Eternidad | Natasha & Tú</title>
+    <title>El Invernadero de Natasha | 30 de Octubre</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Montserrat:wght@200;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,700&family=Raleway:wght@200;400&display=swap');
 
-        body { margin: 0; overflow: hidden; background: #010103; font-family: 'Montserrat', sans-serif; color: white; }
+        body { margin: 0; overflow: hidden; background: #050205; font-family: 'Raleway', sans-serif; }
         
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #0a0112 0%, #000 100%);
-            z-index: 1000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; transition: opacity 1.5s;
+            background: #1a0a1a; z-index: 1000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; transition: opacity 2s;
         }
-        .fragment-loader {
-            width: 40px; height: 40px; background: #ff3377;
-            animation: rotateFragment 2s infinite ease-in-out;
-            box-shadow: 0 0 20px #ff3377;
+        .bloom-circle {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: #ff80ab; filter: blur(20px);
+            animation: pulse 2s infinite ease-in-out;
         }
-        @keyframes rotateFragment {
-            0% { transform: rotateX(0deg) rotateY(0deg); }
-            50% { transform: rotateX(180deg) rotateY(180deg); opacity: 0.5; }
-            100% { transform: rotateX(360deg) rotateY(360deg); }
-        }
-        #load-txt { margin-top: 20px; letter-spacing: 5px; font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase;}
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.5); opacity: 1; } }
 
         #ui-layer { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            pointer-events: none; z-index: 10; 
-            display: flex; flex-direction: column; justify-content: space-between; 
-            padding: 50px; box-sizing: border-box; 
+            pointer-events: none; z-index: 10; padding: 40px; box-sizing: border-box;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
-        
-        .header { opacity: 0; transform: translateY(-20px); transition: 2s; }
+
         .header h1 { 
-            font-family: 'Cinzel Decorative', cursive; margin: 0; font-size: 3rem; 
-            color: #ffffff; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px #ff3377; 
-            letter-spacing: 5px; 
-        }
-        .header p { font-weight: 200; letter-spacing: 8px; color: rgba(255,255,255,0.7); margin-top: 5px; font-size: 12px; text-transform: uppercase;}
-        
-        .contador { 
-            position: absolute; top: 50px; right: 50px; 
-            background: rgba(0,0,0,0.5); padding: 15px 25px; 
-            border-radius: 2px; backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255,100,150,0.3); 
-            opacity: 0; transition: 2s; font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
-        }
-        .contador span { font-weight: 600; color: #ff3377; font-size: 16px; }
-
-        #caption-box {
-            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
-            text-align: center; width: 60%; opacity: 0; transition: 1s;
-            font-size: 1.5rem; font-style: italic; font-weight: 200;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
-            line-height: 1.8; color: #ffebf2;
+            font-family: 'Playfair Display', serif; font-size: 2.8rem; color: #fff;
+            margin: 0; letter-spacing: 4px; text-shadow: 0 0 20px rgba(255,128,171,0.6);
+            opacity: 0; transform: translateY(-20px); transition: 2.5s;
         }
 
-        #final-msg { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            text-align: center; width: 80%; opacity: 0; transition: 3s; pointer-events: none;
+        #caption {
+            text-align: center; color: #ffebf2; font-family: 'Playfair Display', serif;
+            font-size: 1.8rem; font-style: italic; opacity: 0; transition: 1.5s;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5); margin-bottom: 100px;
         }
-        #final-msg h2 { 
-            font-family: 'Cinzel Decorative', cursive; font-size: 4rem; 
-            color: white; text-shadow: 0 0 30px #ff3377, 0 0 60px #ff3377; 
-            margin: 0; letter-spacing: 10px;
-        }
-        #final-msg p { font-size: 1.2rem; font-weight: 200; color: rgba(255,255,255,0.8); letter-spacing: 5px; text-transform: uppercase; margin-top: 20px;}
 
-        #instrucciones {
-            position: absolute; bottom: 30px; width: 100%; text-align: center;
-            color: rgba(255,255,255,0.3); font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
-            opacity: 0; transition: 3s;
+        .footer-info {
+            text-align: center; color: rgba(255,255,255,0.4); font-size: 0.7rem;
+            letter-spacing: 5px; text-transform: uppercase; margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
 
 <div id="loader">
-    <div class="fragment-loader"></div>
-    <div id="load-txt">Iniciando Nexo Temporal</div>
+    <div class="bloom-circle"></div>
+    <p style="color: white; letter-spacing: 5px; margin-top: 30px; font-size: 10px;">CULTIVANDO TU JARDÍN...</p>
 </div>
 
 <div id="ui-layer">
     <div class="header" id="ui-header">
-        <h1>NATASHA</h1>
-        <p>Nuestro 30 de Octubre | Eternidad</p>
+        <h1>Natasha</h1>
+        <p style="color: #ff80ab; letter-spacing: 6px; font-size: 12px; margin: 5px 0;">EL INVERNADERO DE NUESTRA HISTORIA</p>
     </div>
-    
-    <div class="contador" id="ui-contador">Fragmentos Sincronizados: <span id="found-count">0</span> / 5</div>
-    
-    <div id="caption-box"></div>
 
-    <div id="instrucciones">Utiliza el ratón para girar | Haz clic en los fragmentos de cristal</div>
+    <div id="caption"></div>
 
-    <div id="final-msg">
-        <h2>TE AMO</h2>
-        <p>Gracias por este viaje inigualable.</p>
-    </div>
+    <div class="footer-info">Explora el jardín · Toca las flores de cristal</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 
 <script>
-let scene, camera, renderer, controls, raycaster, mouse;
-let fragments = [], foundMemories = 0;
-let finalMonument, nebulaParticles, groundMirror;
-let clock = new THREE.Clock();
-
-const loaderPage = document.getElementById('loader');
-const foundCountUI = document.getElementById('found-count');
-const captionBox = document.getElementById('caption-box');
-
-const recuerdosInfo = [
-    "Ese primer 'hola' que vibró en el tiempo...",
-    "Tu risa, el sonido más bello del universo.",
-    "El momento en que supe que eras tú, y nadie más.",
-    "Nuestra primera aventura juntos bajo las estrellas.",
-    "La promesa que renovamos este 30 de Octubre."
-];
+let scene, camera, renderer, controls, flowers = [], fireflies;
+const clock = new THREE.Clock();
 
 function init() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x010103, 0.02);
+    scene.background = new THREE.Color(0x0a050a);
+    scene.fog = new THREE.FogExp2(0x1a0a1a, 0.015);
 
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
-    camera.position.set(0, 50, 100); 
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 20, 50);
 
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); 
-    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.toneMapping = THREE.ReinhardToneMapping;
     document.body.appendChild(renderer.domElement);
 
-    // ¡AQUÍ ESTABA EL ERROR! Ya está corregido agregando THREE.
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.03;
-    controls.minDistance = 10;
-    controls.maxDistance = 150;
-    controls.maxPolarAngle = Math.PI / 2 - 0.05;
+    controls.maxPolarAngle = Math.PI / 2 - 0.1;
 
-    raycaster = new THREE.Raycaster();
-    mouse = new THREE.Vector2();
-
-    scene.add(new THREE.AmbientLight(0x05050a, 1));
-
-    const mainLight = new THREE.PointLight(0xff3377, 5, 100);
-    mainLight.position.set(0, 10, 0);
-    scene.add(mainLight);
-
-    // Suelo Espejo
-    const mirrorGeo = new THREE.PlaneGeometry(1000, 1000);
-    groundMirror = new THREE.Reflector(mirrorGeo, {
-        clipBias: 0.003, textureWidth: window.innerWidth * window.devicePixelRatio,
-        textureHeight: window.innerHeight * window.devicePixelRatio,
-        color: 0x111111, recursion: 1
+    // 1. EL DOMO DE CRISTAL (Arquitectura)
+    const domeGeo = new THREE.SphereGeometry(60, 32, 20, 0, Math.PI * 2, 0, Math.PI / 2);
+    const domeMat = new THREE.MeshPhongMaterial({
+        color: 0x442244, wireframe: true, transparent: true, opacity: 0.1
     });
-    groundMirror.rotation.x = -Math.PI / 2;
-    groundMirror.position.y = -0.1;
-    scene.add(groundMirror);
+    const dome = new THREE.Mesh(domeGeo, domeMat);
+    scene.add(dome);
 
-    // Nebulosa
-    nebulaParticles = new THREE.Group();
-    const starGeo = new THREE.BufferGeometry();
-    const starCoords = [];
-    for(let i=0; i<15000; i++) starCoords.push((Math.random()-0.5)*1500, Math.random()*500, (Math.random()-0.5)*1500);
-    starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
-    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.2, transparent: true, opacity: 0.5 });
-    nebulaParticles.add(new THREE.Points(starGeo, starMat));
-    scene.add(nebulaParticles);
+    // 2. EL SUELO (Mármol Negro)
+    const floorGeo = new THREE.CircleGeometry(60, 64);
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x050505, metalness: 0.9, roughness: 0.1 });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    scene.add(floor);
 
-    // Fragmentos de cristal
-    const fragmentGeo = new THREE.DodecahedronGeometry(1.5, 0); 
+    // 3. LUCES AMBIENTALES
+    const ambient = new THREE.AmbientLight(0x402040, 0.5);
+    scene.add(ambient);
+
+    const hemi = new THREE.HemisphereLight(0xff80ab, 0x050505, 0.4);
+    scene.add(hemi);
+
+    // 4. LUCIÉRNAGAS (Densidad Visual)
+    const fireflyGeo = new THREE.BufferGeometry();
+    const fireflyPos = [];
+    for(let i=0; i<300; i++) {
+        fireflyPos.push((Math.random()-0.5)*100, Math.random()*30, (Math.random()-0.5)*100);
+    }
+    fireflyGeo.setAttribute('position', new THREE.Float32BufferAttribute(fireflyPos, 3));
+    const fireflyMat = new THREE.PointsMaterial({
+        color: 0xfff59d, size: 0.4, transparent: true, blending: THREE.AdditiveBlending
+    });
+    fireflies = new THREE.Points(fireflyGeo, fireflyMat);
+    scene.add(fireflies);
+
+    // 5. FLORES DE CRISTAL (Los 5 Recuerdos)
+    const flowerTexts = [
+        "Nuestra primera mirada...",
+        "Esa risa que me cambió la vida.",
+        "Tu mano junto a la mía, siempre.",
+        "Cada 30 de Octubre es un regalo.",
+        "Te amo más allá de este jardín."
+    ];
 
     for(let i=0; i<5; i++) {
-        const mat = new THREE.MeshPhongMaterial({
-            color: 0xffffff, emissive: 0xff3377, emissiveIntensity: 1,
-            transparent: true, opacity: 0.6, shininess: 100, flatShading: true
-        });
-        const mesh = new THREE.Mesh(fragmentGeo, mat);
+        const group = new THREE.Group();
         
+        // Tallo
+        const stemGeo = new THREE.CylinderGeometry(0.1, 0.2, 4);
+        const stemMat = new THREE.MeshPhongMaterial({ color: 0x224422 });
+        const stem = new THREE.Mesh(stemGeo, stemMat);
+        stem.position.y = 2;
+        group.add(stem);
+
+        // Pétalos de Cristal
+        const petalGeo = new THREE.IcosahedronGeometry(1.2, 0);
+        const petalMat = new THREE.MeshPhongMaterial({
+            color: 0xffffff, emissive: 0xff80ab, emissiveIntensity: 1,
+            transparent: true, opacity: 0.8, flatShading: true
+        });
+        const flowerHead = new THREE.Mesh(petalGeo, petalMat);
+        flowerHead.position.y = 4.5;
+        group.add(flowerHead);
+
+        // Luz propia de la flor
+        const fLight = new THREE.PointLight(0xff80ab, 2, 15);
+        fLight.position.y = 5;
+        group.add(fLight);
+
         const angle = (i / 5) * Math.PI * 2;
-        mesh.position.set(Math.cos(angle) * 20, 5, Math.sin(angle) * 20);
-        mesh.userData = { id: i, found: false, texto: recuerdosInfo[i] };
+        group.position.set(Math.cos(angle) * 15, 0, Math.sin(angle) * 15);
+        group.userData = { text: flowerTexts[i], active: false };
         
-        const light = new THREE.PointLight(0xff3377, 1, 15);
-        light.position.set(0, -2, 0);
-        mesh.add(light);
-
-        scene.add(mesh);
-        fragments.push(mesh);
+        scene.add(group);
+        flowers.push(group);
     }
 
-    // Monumento Final (Corazón 3D)
-    finalMonument = new THREE.Group();
-    const heartShape = new THREE.Shape();
-    heartShape.moveTo( 0, 0 );
-    heartShape.bezierCurveTo( 0, -3, -5, -15, -20, -15 );
-    heartShape.bezierCurveTo( -35, -15, -35, 7, -35, 7 );
-    heartShape.bezierCurveTo( -35, 15, -25, 25, 0, 40 );
-    heartShape.bezierCurveTo( 25, 25, 35, 15, 35, 7 );
-    heartShape.bezierCurveTo( 35, 7, 35, -15, 20, -15 );
-    heartShape.bezierCurveTo( 5, -15, 0, -3, 0, 0 );
+    // Interacción
+    window.addEventListener('click', onClick);
 
-    const extSettings = { depth: 2, bevelEnabled: true, bevelSegments: 3, steps: 2, bevelSize: 2, bevelThickness: 2 };
-    const heartGeo = new THREE.ExtrudeGeometry(heartShape, extSettings);
-    
-    const goldMat = new THREE.MeshPhysicalMaterial({ 
-        color: 0xffd700, emissive: 0x221100, metalness: 1, roughness: 0.1,
-        clearcoat: 1, clearcoatRoughness: 0
-    });
-    const heartMesh = new THREE.Mesh(heartGeo, goldMat);
-    heartMesh.rotation.x = Math.PI; 
-    heartMesh.scale.set(0.2, 0.2, 0.2);
-    finalMonument.add(heartMesh);
-
-    const torusGeo = new THREE.TorusGeometry(12, 0.1, 16, 100);
-    const lightRingMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending });
-    const lightRing = new THREE.Mesh(torusGeo, lightRingMat);
-    lightRing.rotation.x = Math.PI / 2;
-    finalMonument.add(lightRing);
-
-    finalMonument.scale.set(0, 0, 0); 
-    finalMonument.position.set(0, 5, 0); 
-    scene.add(finalMonument);
-
-    // Arrancar la escena
     setTimeout(() => {
-        loaderPage.style.opacity = '0';
-        setTimeout(() => loaderPage.remove(), 1500);
-        
-        gsap.to(camera.position, { x: 0, y: 15, z: 60, duration: 4, ease: "power2.inOut" });
-        gsap.to('#ui-header', { opacity: 1, y: 0, duration: 2, delay: 2 });
-        gsap.to('#ui-contador', { opacity: 1, duration: 2, delay: 3 });
-        gsap.to('#instrucciones', { opacity: 1, duration: 2, delay: 4 });
-    }, 2000);
-
-    animate();
+        document.getElementById('loader').style.opacity = '0';
+        setTimeout(() => document.getElementById('loader').remove(), 2000);
+        document.getElementById('ui-header').style.opacity = '1';
+        document.getElementById('ui-header').style.transform = 'translateY(0)';
+    }, 3000);
 }
 
-window.addEventListener('click', onDocumentMouseDown);
-window.addEventListener('mousemove', onDocumentMouseMove);
-
-function onDocumentMouseMove(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    
+function onClick(event) {
+    const mouse = new THREE.Vector2(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1
+    );
+    const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(fragments);
-
-    if (intersects.length > 0) {
-        if(!intersects[0].object.userData.found) {
-            document.body.style.cursor = 'pointer';
-        }
-    } else {
-        document.body.style.cursor = 'default';
-    }
-}
-
-function onDocumentMouseDown(event) {
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(fragments);
-
-    if (intersects.length > 0) {
-        playMemorySequence(intersects[0].object);
-    }
-}
-
-function playMemorySequence(fragmentMesh) {
-    if(fragmentMesh.userData.found) return; 
-
-    fragmentMesh.userData.found = true;
-    foundMemories++;
-    foundCountUI.innerText = foundMemories;
-
-    captionBox.innerText = fragmentMesh.userData.texto;
-    gsap.to(captionBox, { opacity: 1, y: -20, duration: 1 });
-    gsap.to('#instrucciones', { opacity: 0, duration: 1 });
-
-    const tl = gsap.timeline();
     
-    tl.to(camera.position, {
-        x: fragmentMesh.position.x * 1.2,
-        y: fragmentMesh.position.y,
-        z: fragmentMesh.position.z * 1.2,
-        duration: 2,
-        ease: "power3.inOut",
-        onUpdate: () => camera.lookAt(fragmentMesh.position)
-    });
-
-    tl.to(fragmentMesh.material, { emissiveIntensity: 20, opacity: 1, duration: 0.5 });
-    tl.to(fragmentMesh.scale, { x: 2, y: 2, z: 2, duration: 0.5 }, "-=0.5");
-
-    tl.to(captionBox, { opacity: 0, y: 0, duration: 1 }, "+=3");
-    tl.to(camera.position, { x: 0, y: 15, z: 60, duration: 2.5, ease: "power2.inOut" }, "-=1");
-    tl.to(fragmentMesh.material, { emissiveIntensity: 2, opacity: 0.5, duration: 1 }, "-=1");
-    tl.to(fragmentMesh.scale, { x: 1, y: 1, z: 1, duration: 1 }, "-=1");
-    
-    tl.call(() => {
-        if(foundMemories < 5) gsap.to('#instrucciones', { opacity: 1, duration: 2 });
-        checkFinalNexus();
-    });
+    const intersects = raycaster.intersectObjects(flowers, true);
+    if(intersects.length > 0) {
+        let obj = intersects[0].object;
+        while(obj.parent && obj.type !== 'Group') obj = obj.parent;
+        revealMemory(obj);
+    }
 }
 
-function checkFinalNexus() {
-    if (foundMemories === 5) {
-        window.removeEventListener('click', onDocumentMouseDown);
-        window.removeEventListener('mousemove', onDocumentMouseMove);
+function revealMemory(flower) {
+    const cap = document.getElementById('caption');
+    cap.innerText = flower.userData.text;
+    cap.style.opacity = '1';
 
-        const tlFinal = gsap.timeline();
+    // Animación de cámara
+    const targetPos = new THREE.Vector3().copy(flower.position).add(new THREE.Vector3(0, 6, 12));
+    
+    // Movimiento suave manual (sin librerías extra para evitar errores)
+    const startPos = camera.position.clone();
+    let t = 0;
+    const interval = setInterval(() => {
+        t += 0.02;
+        camera.position.lerpVectors(startPos, targetPos, t);
+        camera.lookAt(flower.position.x, 5, flower.position.z);
+        if(t >= 1) clearInterval(interval);
+    }, 16);
 
-        tlFinal.to(camera.position, { x: 0, y: 30, z: 100, duration: 4, ease: "power3.inOut" });
-
-        fragments.forEach((frag) => {
-            tlFinal.to(frag.position, { x: 0, y: 5, z: 0, duration: 2, ease: "back.in(1)" }, "-=3");
-            tlFinal.to(frag.material, { emissiveIntensity: 50, duration: 1 }, "-=1.5");
-        });
-
-        tlFinal.call(() => {
-            fragments.forEach(f => scene.remove(f));
-            gsap.to(scene.children.find(c => c.type === "PointLight"), { intensity: 100, duration: 0.1, yoyo: true, repeat: 1 });
-        });
-
-        tlFinal.to(finalMonument.scale, { x: 1, y: 1, z: 1, duration: 3, ease: "elastic.out(1, 0.3)" });
-        
-        tlFinal.call(() => {
-            document.getElementById('final-msg').style.opacity = '1';
-            gsap.to('#ui-header', { opacity: 0, duration: 2 });
-            gsap.to('#ui-contador', { opacity: 0, duration: 2 });
-        });
-    }
+    // Efecto de brillo en la flor
+    flower.children[1].material.emissiveIntensity = 5;
+    setTimeout(() => {
+        cap.style.opacity = '0';
+        flower.children[1].material.emissiveIntensity = 1;
+    }, 4000);
 }
 
 function animate() {
     requestAnimationFrame(animate);
-    controls.update(); 
+    const time = clock.getElapsedTime();
 
-    const time = Date.now() * 0.001;
-    
-    if(nebulaParticles) {
-        nebulaParticles.rotation.y += 0.0005;
+    // Movimiento de luciérnagas
+    if(fireflies) {
+        fireflies.position.y = Math.sin(time * 0.5) * 2;
+        fireflies.rotation.y += 0.001;
     }
 
-    fragments.forEach((frag, i) => {
-        if(!frag.userData.found) {
-            frag.position.y = 5 + Math.sin(time + i) * 0.5;
-            frag.rotation.x += 0.005;
-            frag.rotation.y += 0.01;
-            frag.material.emissiveIntensity = 1.5 + Math.sin(time * 3 + i) * 0.8;
-        }
+    // Balanceo de flores
+    flowers.forEach((f, i) => {
+        f.rotation.y = Math.sin(time + i) * 0.1;
+        f.children[1].rotation.z += 0.01;
+        f.children[1].position.y = 4.5 + Math.sin(time * 2 + i) * 0.2;
     });
 
-    if(finalMonument && foundMemories === 5) {
-        finalMonument.rotation.y += 0.005; 
-        finalMonument.children[0].rotation.z = Math.sin(time) * 0.1; 
-        finalMonument.children[1].rotation.x += 0.01; 
-    }
-
+    controls.update();
     renderer.render(scene, camera);
 }
 
 init();
+animate();
 
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    if(groundMirror) {
-        groundMirror.getRenderTarget().setSize(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio);
-    }
 });
 </script>
 </body>
