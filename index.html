@@ -9,7 +9,6 @@
 
         body { margin: 0; overflow: hidden; background: #010103; font-family: 'Montserrat', sans-serif; color: white; }
         
-        /* Pantalla de Carga Artística */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #0a0112 0%, #000 100%);
@@ -28,7 +27,6 @@
         }
         #load-txt { margin-top: 20px; letter-spacing: 5px; font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase;}
 
-        /* Interfaz de Usuario (UI) Minimalista y Elegante */
         #ui-layer { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             pointer-events: none; z-index: 10; 
@@ -96,7 +94,7 @@
     
     <div id="caption-box"></div>
 
-    <div id="instrucciones">Utiliza el Nexo para explorar | Haz clic en los fragmentos de cristal</div>
+    <div id="instrucciones">Utiliza el ratón para girar | Haz clic en los fragmentos de cristal</div>
 
     <div id="final-msg">
         <h2>TE AMO</h2>
@@ -104,13 +102,12 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r129/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.129/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.129/examples/js/objects/Reflector.js"></script>
 
 <script>
-// CONFIGURACIÓN ESCENA AVANZADA
 let scene, camera, renderer, controls, raycaster, mouse;
 let fragments = [], foundMemories = 0;
 let finalMonument, nebulaParticles, groundMirror;
@@ -120,7 +117,6 @@ const loaderPage = document.getElementById('loader');
 const foundCountUI = document.getElementById('found-count');
 const captionBox = document.getElementById('caption-box');
 
-// DATOS DE LOS RECUERDOS (Edita tus textos aquí para el día 30)
 const recuerdosInfo = [
     "Ese primer 'hola' que vibró en el tiempo...",
     "Tu risa, el sonido más bello del universo.",
@@ -131,37 +127,35 @@ const recuerdosInfo = [
 
 function init() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x010103, 0.02); // Niebla profunda
+    scene.fog = new THREE.FogExp2(0x010103, 0.02);
 
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
-    camera.position.set(0, 50, 100); // Vista cinemática inicial
+    camera.position.set(0, 50, 100); 
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimización
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); 
     renderer.outputEncoding = THREE.sRGBEncoding;
     document.body.appendChild(renderer.domElement);
 
-    controls = new OrbitControls(camera, renderer.domElement);
+    // ¡AQUÍ ESTABA EL ERROR! Ya está corregido agregando THREE.
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.03;
     controls.minDistance = 10;
     controls.maxDistance = 150;
-    controls.maxPolarAngle = Math.PI / 2 - 0.05; // No ver debajo del suelo
+    controls.maxPolarAngle = Math.PI / 2 - 0.05;
 
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
 
-    // 1. ILUMINACIÓN AVANZADA
-    const ambientLight = new THREE.AmbientLight(0x05050a, 1);
-    scene.add(ambientLight);
+    scene.add(new THREE.AmbientLight(0x05050a, 1));
 
     const mainLight = new THREE.PointLight(0xff3377, 5, 100);
     mainLight.position.set(0, 10, 0);
     scene.add(mainLight);
 
-    // 2. SUELO DE ESPEJO INFINITO (Art Ambition #1)
+    // Suelo Espejo
     const mirrorGeo = new THREE.PlaneGeometry(1000, 1000);
     groundMirror = new THREE.Reflector(mirrorGeo, {
         clipBias: 0.003, textureWidth: window.innerWidth * window.devicePixelRatio,
@@ -172,36 +166,17 @@ function init() {
     groundMirror.position.y = -0.1;
     scene.add(groundMirror);
 
-    // 3. NEBULOSA VOLUMÉTRICA GENERATIVA (Art Ambition #2)
+    // Nebulosa
     nebulaParticles = new THREE.Group();
-    
-    // Estrellas de fondo
     const starGeo = new THREE.BufferGeometry();
     const starCoords = [];
-    for(let i=0; i<25000; i++) starCoords.push((Math.random()-0.5)*1500, Math.random()*500, (Math.random()-0.5)*1500);
+    for(let i=0; i<15000; i++) starCoords.push((Math.random()-0.5)*1500, Math.random()*500, (Math.random()-0.5)*1500);
     starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
     const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.2, transparent: true, opacity: 0.5 });
     nebulaParticles.add(new THREE.Points(starGeo, starMat));
-
-    // Polvo estelar rosa/púrpura
-    const dustGeo = new THREE.BufferGeometry();
-    const dustCoords = [];
-    const dustColors = [];
-    const colorOpts = [new THREE.Color(0xff3377), new THREE.Color(0x9900ff), new THREE.Color(0x00ffff)];
-    for(let i=0; i<5000; i++) {
-        dustCoords.push((Math.random()-0.5)*300, Math.random()*150, (Math.random()-0.5)*300);
-        const col = colorOpts[Math.floor(Math.random()*colorOpts.length)];
-        dustColors.push(col.r, col.g, col.b);
-    }
-    dustGeo.setAttribute('position', new THREE.Float32BufferAttribute(dustCoords, 3));
-    dustGeo.setAttribute('color', new THREE.Float32BufferAttribute(dustColors, 3));
-    const dustMat = new THREE.PointsMaterial({ size: 0.8, vertexColors: true, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, flatShading: true });
-    nebulaParticles.add(new THREE.Points(dustGeo, dustMat));
-    
     scene.add(nebulaParticles);
 
-    // 4. CREAR FRAGMENTOS FRACTALES (Art Ambition #3)
-    // Geometría compleja dentada
+    // Fragmentos de cristal
     const fragmentGeo = new THREE.DodecahedronGeometry(1.5, 0); 
 
     for(let i=0; i<5; i++) {
@@ -211,12 +186,10 @@ function init() {
         });
         const mesh = new THREE.Mesh(fragmentGeo, mat);
         
-        // Posición circular
         const angle = (i / 5) * Math.PI * 2;
         mesh.position.set(Math.cos(angle) * 20, 5, Math.sin(angle) * 20);
         mesh.userData = { id: i, found: false, texto: recuerdosInfo[i] };
         
-        // Un halo de luz debajo
         const light = new THREE.PointLight(0xff3377, 1, 15);
         light.position.set(0, -2, 0);
         mesh.add(light);
@@ -225,10 +198,8 @@ function init() {
         fragments.push(mesh);
     }
 
-    // 5. CREAR MONUMENTO FINAL (Corazón Fractal Dorado - Art Ambition #4)
+    // Monumento Final (Corazón 3D)
     finalMonument = new THREE.Group();
-    
-    // El Corazón Estilizado (Geometría compleja)
     const heartShape = new THREE.Shape();
     heartShape.moveTo( 0, 0 );
     heartShape.bezierCurveTo( 0, -3, -5, -15, -20, -15 );
@@ -241,33 +212,30 @@ function init() {
     const extSettings = { depth: 2, bevelEnabled: true, bevelSegments: 3, steps: 2, bevelSize: 2, bevelThickness: 2 };
     const heartGeo = new THREE.ExtrudeGeometry(heartShape, extSettings);
     
-    // Material de oro líquido refinado
     const goldMat = new THREE.MeshPhysicalMaterial({ 
         color: 0xffd700, emissive: 0x221100, metalness: 1, roughness: 0.1,
-        clearcoat: 1, clearcoatRoughness: 0, transmission: 0.2
+        clearcoat: 1, clearcoatRoughness: 0
     });
     const heartMesh = new THREE.Mesh(heartGeo, goldMat);
-    heartMesh.rotation.x = Math.PI; // Invertir
+    heartMesh.rotation.x = Math.PI; 
     heartMesh.scale.set(0.2, 0.2, 0.2);
     finalMonument.add(heartMesh);
 
-    // Anillo orbital de luz
     const torusGeo = new THREE.TorusGeometry(12, 0.1, 16, 100);
     const lightRingMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending });
     const lightRing = new THREE.Mesh(torusGeo, lightRingMat);
     lightRing.rotation.x = Math.PI / 2;
     finalMonument.add(lightRing);
 
-    finalMonument.scale.set(0, 0, 0); // Oculto
+    finalMonument.scale.set(0, 0, 0); 
     finalMonument.position.set(0, 5, 0); 
     scene.add(finalMonument);
 
-    // INICIAR CINEMÁTICA DE ENTRADA
+    // Arrancar la escena
     setTimeout(() => {
         loaderPage.style.opacity = '0';
         setTimeout(() => loaderPage.remove(), 1500);
         
-        // GSAP Intro
         gsap.to(camera.position, { x: 0, y: 15, z: 60, duration: 4, ease: "power2.inOut" });
         gsap.to('#ui-header', { opacity: 1, y: 0, duration: 2, delay: 2 });
         gsap.to('#ui-contador', { opacity: 1, duration: 2, delay: 3 });
@@ -277,7 +245,6 @@ function init() {
     animate();
 }
 
-// LÓGICA DE INTERACCIÓN Y CINEMÁTICAS
 window.addEventListener('click', onDocumentMouseDown);
 window.addEventListener('mousemove', onDocumentMouseMove);
 
@@ -287,15 +254,13 @@ function onDocumentMouseMove(event) {
     
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(fragments);
-    
-    // Efecto visual al pasar el ratón (Hover)
-    fragments.forEach(f => {
-        if(!f.userData.found) gsap.to(f.scale, { x: 1, y: 1, z: 1, duration: 0.3 });
-    });
 
     if (intersects.length > 0) {
-        if(!intersects[0].object.userData.found)
-            gsap.to(intersects[0].object.scale, { x: 1.3, y: 1.3, z: 1.3, duration: 0.3 });
+        if(!intersects[0].object.userData.found) {
+            document.body.style.cursor = 'pointer';
+        }
+    } else {
+        document.body.style.cursor = 'default';
     }
 }
 
@@ -308,7 +273,6 @@ function onDocumentMouseDown(event) {
     }
 }
 
-// SECUENCIA CINEMÁTICA DE UN RECUERDO
 function playMemorySequence(fragmentMesh) {
     if(fragmentMesh.userData.found) return; 
 
@@ -316,14 +280,12 @@ function playMemorySequence(fragmentMesh) {
     foundMemories++;
     foundCountUI.innerText = foundMemories;
 
-    // UI Feedback
     captionBox.innerText = fragmentMesh.userData.texto;
     gsap.to(captionBox, { opacity: 1, y: -20, duration: 1 });
     gsap.to('#instrucciones', { opacity: 0, duration: 1 });
 
     const tl = gsap.timeline();
     
-    // 1. Viaje de cámara hiper-suave al fragmento
     tl.to(camera.position, {
         x: fragmentMesh.position.x * 1.2,
         y: fragmentMesh.position.y,
@@ -333,11 +295,9 @@ function playMemorySequence(fragmentMesh) {
         onUpdate: () => camera.lookAt(fragmentMesh.position)
     });
 
-    // 2. Activación del Fragmento (Haz de luz)
     tl.to(fragmentMesh.material, { emissiveIntensity: 20, opacity: 1, duration: 0.5 });
     tl.to(fragmentMesh.scale, { x: 2, y: 2, z: 2, duration: 0.5 }, "-=0.5");
 
-    // 3. Regresar cámara a vista general y ocultar texto
     tl.to(captionBox, { opacity: 0, y: 0, duration: 1 }, "+=3");
     tl.to(camera.position, { x: 0, y: 15, z: 60, duration: 2.5, ease: "power2.inOut" }, "-=1");
     tl.to(fragmentMesh.material, { emissiveIntensity: 2, opacity: 0.5, duration: 1 }, "-=1");
@@ -349,7 +309,6 @@ function playMemorySequence(fragmentMesh) {
     });
 }
 
-// EL CLÍMAX: NACIMIENTO DEL NEXO
 function checkFinalNexus() {
     if (foundMemories === 5) {
         window.removeEventListener('click', onDocumentMouseDown);
@@ -357,26 +316,20 @@ function checkFinalNexus() {
 
         const tlFinal = gsap.timeline();
 
-        // 1. Cámara se aleja para el gran final
         tlFinal.to(camera.position, { x: 0, y: 30, z: 100, duration: 4, ease: "power3.inOut" });
 
-        // 2. Los fragmentos viajan al centro y se fusionan
-        fragments.forEach((frag, i) => {
+        fragments.forEach((frag) => {
             tlFinal.to(frag.position, { x: 0, y: 5, z: 0, duration: 2, ease: "back.in(1)" }, "-=3");
             tlFinal.to(frag.material, { emissiveIntensity: 50, duration: 1 }, "-=1.5");
         });
 
-        // 3. IMPLOSIÓN Y NACIMIENTO DEL MONUMENTO
         tlFinal.call(() => {
-            // Eliminar fragmentos
             fragments.forEach(f => scene.remove(f));
-            // Flash de luz masivo (PointLight intensity)
             gsap.to(scene.children.find(c => c.type === "PointLight"), { intensity: 100, duration: 0.1, yoyo: true, repeat: 1 });
         });
 
         tlFinal.to(finalMonument.scale, { x: 1, y: 1, z: 1, duration: 3, ease: "elastic.out(1, 0.3)" });
         
-        // 4. Activar mensaje final y UI final
         tlFinal.call(() => {
             document.getElementById('final-msg').style.opacity = '1';
             gsap.to('#ui-header', { opacity: 0, duration: 2 });
@@ -385,26 +338,16 @@ function checkFinalNexus() {
     }
 }
 
-// BUCLE DE ANIMACIÓN ARTÍSTICA
 function animate() {
     requestAnimationFrame(animate);
     controls.update(); 
 
-    const delta = clock.getDelta();
     const time = Date.now() * 0.001;
     
-    // Movimiento orgánico de la nebulosa
     if(nebulaParticles) {
         nebulaParticles.rotation.y += 0.0005;
-        nebulaParticles.children[1].geometry.attributes.position.array.forEach((v, i) => {
-            if(i % 3 === 1) { // Solo eje Y
-                nebulaParticles.children[1].geometry.attributes.position.array[i] += Math.sin(time + i) * 0.01;
-            }
-        });
-        nebulaParticles.children[1].geometry.attributes.position.needsUpdate = true;
     }
 
-    // Animación de fragmentos flotando y rotando
     fragments.forEach((frag, i) => {
         if(!frag.userData.found) {
             frag.position.y = 5 + Math.sin(time + i) * 0.5;
@@ -414,20 +357,17 @@ function animate() {
         }
     });
 
-    // Animación del monumento final
     if(finalMonument && foundMemories === 5) {
-        finalMonument.rotation.y += 0.005; // Rotación suave
-        finalMonument.children[0].rotation.z = Math.sin(time) * 0.1; // Balanceo del corazón
-        finalMonument.children[1].rotation.x += 0.01; // Anillo orbital
+        finalMonument.rotation.y += 0.005; 
+        finalMonument.children[0].rotation.z = Math.sin(time) * 0.1; 
+        finalMonument.children[1].rotation.x += 0.01; 
     }
 
     renderer.render(scene, camera);
 }
 
-// Iniciar
 init();
 
-// Ajuste de pantalla perfecto
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
