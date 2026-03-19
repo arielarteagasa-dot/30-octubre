@@ -3,35 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universo para Natasha | 30 de Octubre</title>
+    <title>Santuario de Partículas | Natasha | 30 de Octubre</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@200;400;600&display=swap');
 
         body { margin: 0; overflow: hidden; background: #050010; font-family: 'Montserrat', sans-serif; color: white; }
-        
         #ui-layer { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; padding: 40px; box-sizing: border-box; }
         
+        /* Encabezado */
         .header h1 { font-family: 'Dancing Script', cursive; margin: 0; font-size: 3.5rem; color: #ff3377; text-shadow: 0 0 25px rgba(255, 51, 119, 0.9); }
-        .fecha-universo { letter-spacing: 10px; font-size: 0.8rem; color: rgba(255, 255, 255, 0.7); text-transform: uppercase; }
+        .fecha-universo { letter-spacing: 10px; font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); text-transform: uppercase; margin-bottom: 5px;}
 
-        .contador-card { position: absolute; bottom: 40px; left: 40px; background: rgba(0,0,0,0.5); padding: 15px 30px; border-radius: 50px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 51, 119, 0.3); text-align: center; }
-        #timer { font-size: 1.1rem; font-weight: 200; color: #ffebf2; letter-spacing: 1px;}
+        /* Contador Mejor Puesto (Abajo Izquierda) */
+        .contador-card { position: absolute; bottom: 40px; left: 40px; background: rgba(0,0,0,0.4); padding: 15px 30px; border-radius: 50px; backdrop-filter: blur(8px); border: 1px solid rgba(255, 51, 119, 0.3); text-align: center; }
+        #timer { font-size: 1.2rem; font-weight: 200; color: #ffebf2; letter-spacing: 1px;}
 
-        /* Cargador con salida de emergencia */
-        #loader { position: fixed; width: 100%; height: 100%; background: #000; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1s ease-out; }
-        .loader-heart { font-size: 50px; color: #ff3377; animation: pulse 1s infinite; text-shadow: 0 0 20px #ff3377; }
+        /* Cargador */
+        #loader { position: fixed; width: 100%; height: 100%; background: #000; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1.5s ease-out; }
+        .loader-heart { font-size: 50px; color: #ff3377; animation: pulse 1s infiniteEaseInOut; text-shadow: 0 0 20px #ff3377; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
 
-        #caption-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%; font-size: 1.5rem; font-style: italic; color: #ffebf2; text-shadow: 0 0 15px rgba(0,0,0,0.8); opacity: 0; transition: opacity 0.8s; pointer-events: none; }
+        /* Mensaje Revelado */
+        #caption-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 60%; font-size: 1.6rem; font-style: italic; color: #ffebf2; text-shadow: 0 0 15px rgba(0,0,0,0.7); opacity: 0; transition: opacity 1s; padding: 20px; border-radius: 10px; }
         
-        #instrucciones { position: absolute; top: 130px; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 9px; letter-spacing: 3px; text-transform: uppercase;}
+        #instrucciones { position: absolute; top: 130px; width: 100%; text-align: center; color: rgba(255,255,255,0.5); font-size: 10px; letter-spacing: 4px; text-transform: uppercase;}
     </style>
 </head>
 <body>
 
 <div id="loader">
     <div class="loader-heart">❤</div>
-    <p style="margin-top: 20px; letter-spacing: 4px; font-size: 10px; color: #ff3377;">CARGANDO TU UNIVERSO...</p>
+    <p style="margin-top: 20px; letter-spacing: 5px; font-size: 11px; color: #ff3377;">GENERANDO EL UNIVERSO DE NATASHA</p>
 </div>
 
 <div id="ui-layer">
@@ -40,124 +42,185 @@
         <h1>Para Mi Natasha</h1>
     </div>
     
-    <div id="instrucciones">Toca el Corazón Central</div>
+    <div id="instrucciones">Utiliza el mouse para orbitar | Haz clic en el Corazón Central</div>
     <div id="caption-box"></div>
 
     <div class="contador-card">
-        <p style="margin: 0 0 5px 0; font-size: 0.6rem; letter-spacing: 2px; color: #ff3377;">TIEMPO A TU LADO</p>
-        <div id="timer">Iniciando...</div>
+        <p style="margin: 0 0 10px 0; font-size: 0.7rem; letter-spacing: 3px;">TIEMPO A TU LADO</p>
+        <div id="timer">Calculando eternidad...</div>
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 
 <script>
 let scene, camera, renderer, controls, fireflies, heartParticles;
 let clock = new THREE.Clock();
 
 function init() {
-    try {
-        scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x050010, 0.01);
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x050010, 0.01); // Niebla suave para la aurora boreal
 
-        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 20, 100);
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 30, 100); // Vista cinemática alta
 
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        document.body.appendChild(renderer.domElement);
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.toneMapping = THREE.ReinhardToneMapping;
+    document.body.appendChild(renderer.domElement);
 
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.autoRotate = true;
-        controls.autoRotateSpeed = 0.5;
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.maxPolarAngle = Math.PI / 2 - 0.1;
 
-        // Estrellas de fondo
-        const starGeo = new THREE.BufferGeometry();
-        const starPos = [];
-        for(let i=0; i<15000; i++) starPos.push((Math.random()-0.5)*400, (Math.random()-0.5)*400, (Math.random()-0.5)*400);
-        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
-        scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.2})));
+    // 1. ILUMINACIÓN VOLUMÉTRICA
+    scene.add(new THREE.AmbientLight(0x050010, 1));
+    const pointL = new THREE.PointLight(0xff3377, 4, 150);
+    pointL.position.set(0, 30, 0);
+    scene.add(pointL);
 
-        // Corazón de Partículas
-        heartParticles = createHeart(3000);
-        scene.add(heartParticles);
+    // 2. SISTEMA DE PARTÍCULAS BASE: EL UNIVERSO (60,000 luciérnagas)
+    const fireflyGeo = new THREE.BufferGeometry();
+    const fireflyPos = [];
+    for(let i=0; i<60000; i++) fireflyPos.push((Math.random()-0.5)*300, (Math.random()-0.5)*150, (Math.random()-0.5)*300);
+    fireflyGeo.setAttribute('position', new THREE.Float32BufferAttribute(fireflyPos, 3));
+    const fireflyMat = new THREE.PointsMaterial({color: 0xfff59d, size: 0.3, transparent: true, blending: THREE.AdditiveBlending});
+    fireflies = new THREE.Points(fireflyGeo, fireflyMat);
+    scene.add(fireflies);
 
-        window.addEventListener('click', onInteract);
-        animate();
+    // 3. SISTEMA DE PARTÍCULAS CORAZÓN LATIENTE (5,000 unidades)
+    heartParticles = createHeartParticles(5000);
+    scene.add(heartParticles);
 
-        // SALIDA DE EMERGENCIA DEL LOADER: Pase lo que pase, a los 3 seg se quita
-        setTimeout(removeLoader, 3000);
+    // Arrancar la experiencia cinemática suave
+    setTimeout(() => {
+        document.getElementById('loader').style.opacity = '0';
+        setTimeout(() => document.getElementById('loader').remove(), 1000);
+        gsap.to(camera.position, {y: 15, z: 80, duration: 4, ease: "power2.inOut"});
+    }, 2000);
 
-    } catch(e) {
-        console.error(e);
-        removeLoader(); // Quitar loader si hay error para no dejar pantalla negra
-    }
+    window.addEventListener('click', onClick);
+    animate();
 }
 
-function createHeart(count) {
-    const geo = new THREE.BufferGeometry();
-    const pos = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-        const t = Math.random() * Math.PI * 2;
+// Función Maestra: Crear Corazón de Partículas Procedimental (AAA Ambition)
+function createHeartParticles(numParticles) {
+    const positions = new THREE.BufferAttribute(new Float32Array(numParticles * 3), 3);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', positions);
+
+    // Fórmula Paramétrica del Corazón 3D (No robótico, puras matemáticas)
+    for (let i = 0; i < numParticles; i++) {
+        const t = (i / numParticles) * Math.PI * 2;
         const x = 16 * Math.pow(Math.sin(t), 3);
         const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
-        const z = (Math.random() - 0.5) * 8;
-        pos[i*3] = x * 1.2;
-        pos[i*3+1] = y * 1.2;
-        pos[i*3+2] = z;
-    }
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    return new THREE.Points(geo, new THREE.PointsMaterial({color: 0xff3377, size: 0.6, blending: THREE.AdditiveBlending, transparent: true}));
-}
-
-function removeLoader() {
-    const loader = document.getElementById('loader');
-    if(loader) {
-        loader.style.opacity = '0';
-        setTimeout(() => loader.remove(), 1000);
-    }
-}
-
-const frases = ["Eres mi universo entero ❤️", "Cada segundo a tu lado es magia", "30 de Octubre: Mi día favorito", "Te amo más de lo que las palabras dicen"];
-
-function onInteract(e) {
-    const mouse = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
-    const ray = new THREE.Raycaster();
-    ray.setFromCamera(mouse, camera);
-    
-    if(ray.intersectObject(heartParticles).length > 0) {
-        const cap = document.getElementById('caption-box');
-        cap.innerText = frases[Math.floor(Math.random()*frases.length)];
-        cap.style.opacity = '1';
         
-        gsap.to(heartParticles.scale, {x: 1.5, y: 1.5, z: 1.5, duration: 0.5, yoyo: true, repeat: 1});
-        setTimeout(() => cap.style.opacity = '0', 3000);
+        // Aleatoriedad suave para forma orgánica
+        const z = (Math.random() - 0.5) * 5; 
+
+        // Escalar y posicionar
+        positions.setXYZ(i, x * 1.5, y * 1.5, z);
+    }
+
+    const material = new THREE.PointsMaterial({
+        color: 0xffffff, emissive: 0xff3377, emissiveIntensity: 2,
+        size: 0.8, transparent: true, blending: THREE.AdditiveBlending, flatShading: true
+    });
+    
+    // Asignar el nexo interactivo para Raycasting
+    const p = new THREE.Points(geometry, material);
+    p.position.y = 15;
+    p.userData = { interactive: true };
+    return p;
+}
+
+// LÓGICA DE INTERACCIÓN: REVELAR MENSAJES DE NATASHA
+const mensajesNexo = [
+    "Ese 30 de Octubre... Gracias por elegirme. ❤️",
+    "Tu risa es la melodía que alegra mis días. Te amo.",
+    "Cada momento contigo es un regalo eterno.",
+    "Gracias por ser mi paz y mi aventura. Te amo hoy y siempre.",
+    "Eres mi persona favorita. ¡Por muchos octubres más!"
+];
+
+function onClick(e) {
+    const mouse = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObject(heartParticles, true);
+    
+    if(intersects.length > 0) {
+        // Cinemática Inspirada AAA: "Explosión de Corazón y Revelación"
+        const tl = gsap.timeline();
+        
+        // 1. Viaje Cinemático Suave (Inspirado en universo-novia)
+        tl.to(camera.position, {
+            x: heartParticles.position.x * 1.4, y: 18, z: heartParticles.position.z * 1.4,
+            duration: 2, ease: "power3.inOut",
+            onUpdate: () => camera.lookAt(heartParticles.position.x, 8, heartParticles.position.z)
+        });
+
+        // 2. "Explosión de Partículas" y Revelar Mensaje (Lo asombroso)
+        tl.call(() => {
+            const cap = document.getElementById('caption-box');
+            cap.innerText = mensajesNexo[Math.floor(Math.random() * mensajesNexo.length)];
+            cap.style.opacity = '1';
+            
+            // Efecto Aurora de Aurora en el mundo
+            gsap.to(scene.fog, { color: 0xff3377, duration: 0.5, yoyo: true, repeat: 1 });
+            
+            // "Dispersión Suave" de Partículas
+            gsap.to(heartParticles.scale, { x: 1.5, y: 1.5, z: 1.5, duration: 0.5 });
+            gsap.to(heartParticles.material, { size: 1.5, duration: 0.5, yoyo: true, repeat: 1 });
+        });
+
+        // Regresar cámara y ocultar texto
+        setTimeout(() => {
+            tl.to('#caption-box', {opacity: 0, duration: 1});
+            tl.to(camera.position, {x:0, y:15, z:60, duration: 3, ease: "power2.inOut"});
+            tl.call(() => {
+                 gsap.to(heartParticles.scale, { x: 1, y: 1, z: 1, duration: 1 });
+            });
+        }, 6000);
     }
 }
 
 function animate() {
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
-    heartParticles.rotation.y += 0.01;
-    heartParticles.scale.setScalar(1 + Math.sin(t*3)*0.05);
+
+    // Movimiento orgánico suave de luciérnagas
+    if(fireflies) {
+        fireflies.position.y = Math.sin(t * 0.2) * 5;
+        fireflies.rotation.y += 0.0002;
+    }
+
+    // El Corazón Latiente Suave (No robótico)
+    const scale = 1 + Math.sin(t * 2) * 0.03; // Latido sutil
+    heartParticles.scale.set(scale, scale, scale);
+    heartParticles.rotation.y += 0.003;
+    heartParticles.position.y = 15 + Math.sin(t*0.5)*1.5; // Flotando mágico
+
     controls.update();
     renderer.render(scene, camera);
 }
 
-// Contador
-const inicio = new Date("October 30, 2024 00:00:00").getTime();
-setInterval(() => {
-    const dif = new Date().getTime() - inicio;
-    const d = Math.floor(dif / 86400000);
-    const h = Math.floor((dif % 86400000) / 3600000);
-    const m = Math.floor((dif % 3600000) / 60000);
-    const s = Math.floor((dif % 60000) / 1000);
-    document.getElementById("timer").innerHTML = `${d}d ${h}h ${m}m ${s}s`;
-}, 1000);
+// 7. Lógica del Contador (Desde el 30 de Octubre 2024)
+const fechaInicio = new Date("October 30, 2024 00:00:00").getTime();
+function updateTimer() {
+    const ahora = new Date().getTime();
+    const diferencia = ahora - fechaInicio;
+    const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+    const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+    const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
+    document.getElementById("timer").innerHTML = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
+}
+setInterval(updateTimer, 1000);
+updateTimer();
 
 init();
 
