@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mapa de recuerdos</title>
+  <title>Mapa de recuerdos — Sorpresa</title>
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -26,17 +26,18 @@
       -moz-osx-font-smoothing:grayscale;
     }
     header{
-      padding:20px;
+      padding:18px;
       text-align:center;
       background:linear-gradient(90deg, rgba(200,90,120,0.08), rgba(200,90,120,0.02));
       border-bottom:1px solid rgba(0,0,0,0.03);
     }
     header h1{margin:0;font-size:1.4rem;color:var(--accent)}
     header p{margin:6px 0 0;color:var(--muted)}
+    header .top-controls{margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 
     main{display:flex;gap:16px;padding:16px}
     #map{flex:1;min-height:72vh;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-    .list{width:340px}
+    .list{width:360px}
     .list h2{margin-top:0}
     #placesList{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
     .placeItem{background:var(--card);padding:10px;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.04);display:flex;gap:10px;align-items:center}
@@ -44,7 +45,7 @@
     .placeMeta{flex:1}
     .placeMeta h3{margin:0;font-size:1rem}
     .placeMeta p{margin:4px 0 0;font-size:0.9rem;color:var(--muted)}
-    .controls{display:flex;gap:8px;margin:10px 0}
+    .controls{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
     .btn{background:var(--accent);color:#fff;border:0;padding:8px 10px;border-radius:8px;cursor:pointer}
     .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(200,90,120,0.12)}
     .small{padding:6px 8px;font-size:0.9rem}
@@ -52,7 +53,7 @@
     /* Modal form */
     .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:999}
     .modal[aria-hidden="false"]{display:flex}
-    .modalCard{background:#fff;padding:16px;border-radius:10px;width:360px;box-shadow:0 12px 40px rgba(0,0,0,0.2)}
+    .modalCard{background:#fff;padding:16px;border-radius:10px;width:380px;box-shadow:0 12px 40px rgba(0,0,0,0.2)}
     .modalCard h3{margin:0 0 8px}
     .field{margin-bottom:8px}
     .field label{display:block;font-size:0.85rem;color:var(--muted);margin-bottom:4px}
@@ -60,6 +61,15 @@
     .field textarea{min-height:80px;resize:vertical}
     .row{display:flex;gap:8px}
     .hint{font-size:0.85rem;color:var(--muted);margin-top:6px}
+
+    /* Surprise modal */
+    .surpriseModal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.85));z-index:1100}
+    .surpriseModal[aria-hidden="false"]{display:flex}
+    .surpriseCard{background:linear-gradient(180deg,#fff,#fff7fb);padding:18px;border-radius:12px;width:92%;max-width:820px;box-shadow:0 20px 60px rgba(0,0,0,0.5);text-align:center}
+    .surpriseCard h2{color:var(--accent);margin:0 0 8px}
+    .surpriseCard .letter{background:#fff;padding:12px;border-radius:8px;text-align:left;max-height:260px;overflow:auto;margin-bottom:12px}
+    .surpriseCard video, .surpriseCard audio{max-width:100%;border-radius:8px;margin-top:8px}
+    .surpriseActions{display:flex;gap:8px;justify-content:center;margin-top:12px}
 
     /* Lightbox */
     .lightbox{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);z-index:1000}
@@ -81,7 +91,21 @@
 <body>
   <header>
     <h1>Mapa de nuestros recuerdos</h1>
-    <p>Haz clic en el mapa para añadir un lugar · Guarda fotos desde tu equipo</p>
+    <p>Haz clic en el mapa para añadir un lugar · Sorpresa programada para el aniversario</p>
+
+    <div class="top-controls">
+      <label style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:0.9rem;color:var(--muted)">Fecha sorpresa</span>
+        <input id="targetDateInput" type="datetime-local" />
+      </label>
+
+      <label style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:0.9rem;color:var(--muted)">Subir video/audio sorpresa</span>
+        <input id="surpriseMediaInput" type="file" accept="video/*,audio/*" />
+      </label>
+
+      <button id="testSurprise" class="btn small">Probar sorpresa</button>
+    </div>
   </header>
 
   <main>
@@ -92,13 +116,19 @@
       <div class="controls">
         <button id="centerAll" class="btn small">Centrar todos</button>
         <button id="toggleLine" class="btn ghost small">Conectar puntos</button>
+        <button id="startTour" class="btn small">Reproducir recorrido</button>
       </div>
       <ul id="placesList"></ul>
-      <p class="hint">Los datos se guardan en tu navegador. Si quieres mover el repo a otro equipo, copia el contenido de "Exportar" en la consola.</p>
-      <div style="display:flex;gap:8px;margin-top:8px">
+      <p class="hint">Los datos y la sorpresa se guardan en tu navegador. Si quieres moverlos a otro equipo, usa Exportar/Importar.</p>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         <button id="exportBtn" class="btn small">Exportar JSON</button>
         <button id="importBtn" class="btn ghost small">Importar JSON</button>
         <input id="importFile" type="file" accept="application/json" style="display:none">
+        <button id="clearBtn" class="btn ghost small">Borrar todo</button>
+      </div>
+      <div style="margin-top:12px;font-size:0.9rem;color:var(--muted)">
+        <strong>Progreso para desbloquear carta:</strong>
+        <div id="visitProgress">0 / 3 lugares visitados</div>
       </div>
     </aside>
   </main>
@@ -131,6 +161,24 @@
     </div>
   </div>
 
+  <!-- Surprise modal -->
+  <div id="surprise" class="surpriseModal" aria-hidden="true">
+    <div class="surpriseCard" role="dialog" aria-modal="true" aria-labelledby="surpriseTitle">
+      <h2 id="surpriseTitle">Feliz aniversario</h2>
+
+      <div class="letter" id="letterContent" tabindex="0">
+        <!-- Carta dinámica -->
+      </div>
+
+      <div id="mediaContainer"></div>
+
+      <div class="surpriseActions">
+        <button id="downloadLetter" class="btn">Descargar carta</button>
+        <button id="closeSurprise" class="btn ghost">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Lightbox -->
   <div id="lightbox" class="lightbox" aria-hidden="true">
     <button id="lbClose" class="lb-close">✕</button>
@@ -142,45 +190,55 @@
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Confetti ligero -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
   <script>
-    // ----- Datos y utilidades -----
-    const STORAGE_KEY = 'mapa_recuerdos_v1';
-    let places = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || [
-      // Ejemplos iniciales que puedes borrar
-      {
-        id: Date.now(),
-        title: "Nuestra primera cita",
-        date: "2021-06-12",
-        lat: -0.180653,
-        lng: -78.467834,
-        img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
-        note: "Café, risas y promesas pequeñas."
-      },
-      {
-        id: Date.now()+1,
-        title: "Viaje a la playa",
-        date: "2022-02-20",
-        lat: -0.953,
-        lng: -80.7,
-        img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
-        note: "Atardecer inolvidable."
-      }
-    ];
+    /****************************************************************
+     * Configuración
+     ****************************************************************/
+    const STORAGE_KEY = 'mapa_recuerdos_sorpresa_v1';
+    // Cambia la fecha objetivo aquí si quieres un valor por defecto
+    const DEFAULT_TARGET_ISO = '2025-10-30T20:00:00';
+    // Cuántos lugares hay que "visitar" para desbloquear la carta
+    const VISIT_THRESHOLD = 3;
 
-    // Guardar en localStorage
-    function savePlaces(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(places)); }
+    /****************************************************************
+     * Estado inicial y utilidades
+     ****************************************************************/
+    let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || {
+      places: [
+        // Ejemplos iniciales (puedes borrar)
+        {
+          id: Date.now(),
+          title: "Nuestra primera cita",
+          date: "2021-06-12",
+          lat: -0.180653,
+          lng: -78.467834,
+          img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+          note: "Café, risas y promesas pequeñas.",
+          visited: false
+        },
+        {
+          id: Date.now()+1,
+          title: "Viaje a la playa",
+          date: "2022-02-20",
+          lat: -0.953,
+          lng: -80.7,
+          img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+          note: "Atardecer inolvidable.",
+          visited: false
+        }
+      ],
+      targetISO: DEFAULT_TARGET_ISO,
+      surpriseMedia: null, // base64 data URL del video/audio
+      letterText: '', // texto personalizado (puede generarse)
+      unlocked: false
+    };
 
-    // ----- Inicializar mapa -----
-    const map = L.map('map', {zoomControl:true}).setView([places[0].lat, places[0].lng], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 
-    // Icono corazón
-    const heartIcon = L.divIcon({ html: '💖', className: 'heart-icon', iconSize: [28,28], iconAnchor: [14,28] });
-
-    // Contenedores
+    // Elementos DOM
     const listEl = document.getElementById('placesList');
     const modal = document.getElementById('modal');
     const inpTitle = document.getElementById('inpTitle');
@@ -199,20 +257,45 @@
     const exportBtn = document.getElementById('exportBtn');
     const importBtn = document.getElementById('importBtn');
     const importFile = document.getElementById('importFile');
+    const clearBtn = document.getElementById('clearBtn');
+    const startTourBtn = document.getElementById('startTour');
+    const visitProgress = document.getElementById('visitProgress');
+
+    const targetDateInput = document.getElementById('targetDateInput');
+    const surpriseMediaInput = document.getElementById('surpriseMediaInput');
+    const testSurpriseBtn = document.getElementById('testSurprise');
+
+    const surpriseModal = document.getElementById('surprise');
+    const letterContent = document.getElementById('letterContent');
+    const mediaContainer = document.getElementById('mediaContainer');
+    const downloadLetterBtn = document.getElementById('downloadLetter');
+    const closeSurpriseBtn = document.getElementById('closeSurprise');
+
+    // Mapa y marcadores
+    const map = L.map('map', {zoomControl:true}).setView([state.places[0].lat, state.places[0].lng], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const heartIcon = L.divIcon({ html: '💖', className: 'heart-icon', iconSize: [28,28], iconAnchor: [14,28] });
 
     let markers = {};
     let polyline = null;
-    let lastClickLatLng = null;
-    let pendingImageData = null;
+    let tourMarker = null;
+    let tourInterval = null;
 
-    // Renderizar todos los marcadores y la lista
+    /****************************************************************
+     * Renderizado de marcadores y lista
+     ****************************************************************/
+    function escapeHtml(str){ return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
+
     function renderAll(){
-      // limpiar marcadores existentes
+      // limpiar marcadores
       Object.values(markers).forEach(m => map.removeLayer(m));
       markers = {};
       listEl.innerHTML = '';
 
-      places.forEach(p => {
+      state.places.forEach(p => {
         const marker = L.marker([p.lat, p.lng], {icon: heartIcon}).addTo(map);
         const popupHtml = `
           <div style="max-width:240px">
@@ -222,6 +305,9 @@
               <img src="${p.img}" alt="${escapeHtml(p.title)}" style="width:100%;border-radius:6px;cursor:pointer" data-id="${p.id}">
             </div>
             <p style="margin:8px 0 0;color:#444">${escapeHtml(p.note)}</p>
+            <div style="margin-top:8px;font-size:0.85rem;color:${p.visited ? '#2a9d8f' : '#666'}">
+              ${p.visited ? 'Visitado' : 'No visitado'}
+            </div>
           </div>
         `;
         marker.bindPopup(popupHtml);
@@ -243,17 +329,18 @@
         li.querySelector('.placeMeta').addEventListener('click', () => {
           map.setView([p.lat, p.lng], 13, {animate:true});
           marker.openPopup();
+          markVisited(p.id);
         });
         listEl.appendChild(li);
       });
 
+      updateVisitProgress();
       drawPolyline();
     }
 
-    // Escape simple para evitar inyección en popups
-    function escapeHtml(str){ return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
-
-    // Lightbox
+    /****************************************************************
+     * Lightbox
+     ****************************************************************/
     function openLightbox(place){
       lbImg.src = place.img;
       lbImg.alt = place.title;
@@ -264,13 +351,31 @@
     lbClose.addEventListener('click', closeLightbox);
     lb.addEventListener('click', (e) => { if(e.target === lb) closeLightbox(); });
 
-    // Añadir marcador al hacer clic en el mapa
+    // Delegación para imágenes dentro de popups
+    map.on('popupopen', function(e){
+      const popupNode = e.popup.getElement();
+      if(!popupNode) return;
+      const img = popupNode.querySelector('img[data-id]');
+      if(img){
+        img.addEventListener('click', () => {
+          const id = Number(img.getAttribute('data-id'));
+          const place = state.places.find(x => x.id === id);
+          if(place) openLightbox(place);
+        });
+      }
+    });
+
+    /****************************************************************
+     * Añadir marcador con subida de foto (modal)
+     ****************************************************************/
+    let lastClickLatLng = null;
+    let pendingImageData = null;
+
     map.on('click', function(e){
       lastClickLatLng = e.latlng;
       openModalForNew();
     });
 
-    // Modal control
     function openModalForNew(){
       inpTitle.value = '';
       inpDate.value = '';
@@ -284,7 +389,6 @@
 
     cancelBtn.addEventListener('click', () => { closeModal(); });
 
-    // Previsualizar imagen subida
     inpFile.addEventListener('change', (ev) => {
       const f = ev.target.files[0];
       if(!f) { preview.innerHTML=''; pendingImageData = null; return; }
@@ -296,7 +400,6 @@
       reader.readAsDataURL(f);
     });
 
-    // Guardar nuevo lugar
     saveBtn.addEventListener('click', () => {
       if(!lastClickLatLng){ alert('Selecciona un punto en el mapa primero.'); return; }
       const title = inpTitle.value.trim() || 'Lugar sin título';
@@ -308,38 +411,47 @@
         title, date,
         lat: lastClickLatLng.lat,
         lng: lastClickLatLng.lng,
-        img, note
+        img, note,
+        visited: false
       };
-      places.push(newPlace);
-      savePlaces();
+      state.places.push(newPlace);
+      saveState();
       renderAll();
       closeModal();
       lastClickLatLng = null;
     });
 
-    // Popup image click delegation
-    map.on('popupopen', function(e){
-      const popupNode = e.popup.getElement();
-      if(!popupNode) return;
-      const img = popupNode.querySelector('img[data-id]');
-      if(img){
-        img.addEventListener('click', () => {
-          const id = Number(img.getAttribute('data-id'));
-          const place = places.find(x => x.id === id);
-          if(place) openLightbox(place);
-        });
+    /****************************************************************
+     * Visitas y desbloqueo de carta
+     ****************************************************************/
+    function markVisited(id){
+      const p = state.places.find(x => x.id === id);
+      if(!p) return;
+      if(!p.visited){
+        p.visited = true;
+        saveState();
+        renderAll();
+        checkUnlockCondition();
       }
-    });
+    }
 
-    // Center all markers
-    centerAllBtn.addEventListener('click', () => {
-      if(places.length === 0) return;
-      const latlngs = places.map(p => [p.lat, p.lng]);
-      const bounds = L.latLngBounds(latlngs);
-      map.fitBounds(bounds.pad(0.2));
-    });
+    function updateVisitProgress(){
+      const visitedCount = state.places.filter(p => p.visited).length;
+      visitProgress.textContent = `${visitedCount} / ${VISIT_THRESHOLD} lugares visitados`;
+    }
 
-    // Polyline toggle
+    function checkUnlockCondition(){
+      if(state.unlocked) return;
+      const visitedCount = state.places.filter(p => p.visited).length;
+      if(visitedCount >= VISIT_THRESHOLD){
+        // desbloqueo por visitas
+        triggerSurprise('visitas');
+      }
+    }
+
+    /****************************************************************
+     * Polyline y recorrido animado
+     ****************************************************************/
     toggleLineBtn.addEventListener('click', () => {
       const on = toggleLineBtn.classList.toggle('active');
       toggleLineBtn.textContent = on ? 'Desconectar puntos' : 'Conectar puntos';
@@ -348,53 +460,6 @@
 
     function drawPolyline(){
       if(polyline){ map.removeLayer(polyline); polyline = null; }
-      if(toggleLineBtn.classList.contains('active') && places.length>1){
-        const latlngs = places.map(p => [p.lat, p.lng]);
-        polyline = L.polyline(latlngs, {color: '#c85a7a', weight: 4, opacity: 0.8}).addTo(map);
-      }
-    }
-
-    // Exportar e importar JSON (import usa input file)
-    exportBtn.addEventListener('click', () => {
-      const data = JSON.stringify(places, null, 2);
-      // Mostrar en ventana emergente para copiar
-      const w = window.open('', '_blank', 'noopener,noreferrer');
-      w.document.write('<pre style="white-space:pre-wrap;word-break:break-word;font-family:monospace;padding:16px">'+escapeHtml(data)+'</pre>');
-      w.document.title = 'Exportar mapa de recuerdos JSON';
-    });
-
-    importBtn.addEventListener('click', () => importFile.click());
-    importFile.addEventListener('change', (e) => {
-      const f = e.target.files[0];
-      if(!f) return;
-      const reader = new FileReader();
-      reader.onload = function(evt){
-        try{
-          const imported = JSON.parse(evt.target.result);
-          if(Array.isArray(imported)){
-            places = imported;
-            savePlaces();
-            renderAll();
-            alert('Importación completada');
-          } else alert('JSON inválido');
-        }catch(err){ alert('Error leyendo JSON'); }
-      };
-      reader.readAsText(f);
-    });
-
-    // Inicializar render
-    renderAll();
-
-    // Helper para accesibilidad: cerrar modal con ESC
-    document.addEventListener('keydown', (e) => {
-      if(e.key === 'Escape'){
-        if(modal.getAttribute('aria-hidden') === 'false') closeModal();
-        if(lb.getAttribute('aria-hidden') === 'false') closeLightbox();
-      }
-    });
-
-    // Nota: si quieres borrar todo, abre la consola y ejecuta:
-    // localStorage.removeItem('mapa_recuerdos_v1'); location.reload();
-  </script>
-</body>
-</html>
+      if(toggleLineBtn.classList.contains('active') && state.places.length>1){
+        const latlngs = state.places.map(p => [p.lat, p.lng]);
+        polyline = L.polyline(latlngs, {color
