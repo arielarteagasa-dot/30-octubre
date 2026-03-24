@@ -1,175 +1,400 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universo Natasha | 140 Días de Magia</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@200;400;600&display=swap');
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mapa de recuerdos</title>
 
-        body { margin: 0; overflow: hidden; background: #020008; font-family: 'Montserrat', sans-serif; color: white; }
-        #ui-layer { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; padding: 40px; box-sizing: border-box; }
-        
-        .header h1 { font-family: 'Dancing Script', cursive; margin: 0; font-size: 3.5rem; color: #ff3377; text-shadow: 0 0 30px rgba(255, 51, 119, 0.8); }
-        .fecha-universo { letter-spacing: 8px; font-size: 0.8rem; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; }
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-        /* Contador Estilizado */
-        .contador-card { position: absolute; bottom: 40px; left: 40px; background: rgba(255, 255, 255, 0.05); padding: 20px 35px; border-radius: 20px; backdrop-filter: blur(15px); border: 1px solid rgba(255, 51, 119, 0.3); box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        #timer { font-size: 1.3rem; font-weight: 200; color: #fff; letter-spacing: 2px;}
-        .label-timer { font-size: 0.6rem; letter-spacing: 3px; color: #ff3377; margin-bottom: 8px; text-transform: uppercase; font-weight: 600; }
+  <style>
+    :root{
+      --bg:#fff7f8;
+      --accent:#c85a7a;
+      --card:#ffffff;
+      --text:#222;
+      --muted:#666;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background:linear-gradient(180deg,var(--bg),#fff);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    header{
+      padding:20px;
+      text-align:center;
+      background:linear-gradient(90deg, rgba(200,90,120,0.08), rgba(200,90,120,0.02));
+      border-bottom:1px solid rgba(0,0,0,0.03);
+    }
+    header h1{margin:0;font-size:1.4rem;color:var(--accent)}
+    header p{margin:6px 0 0;color:var(--muted)}
 
-        #loader { position: fixed; width: 100%; height: 100%; background: #000; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1.5s; }
-        .loader-heart { font-size: 60px; color: #ff3377; animation: beat 1.2s infinite ease-in-out; }
-        @keyframes beat { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.2); opacity: 1; } }
+    main{display:flex;gap:16px;padding:16px}
+    #map{flex:1;min-height:72vh;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    .list{width:340px}
+    .list h2{margin-top:0}
+    #placesList{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+    .placeItem{background:var(--card);padding:10px;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.04);display:flex;gap:10px;align-items:center}
+    .placeItem img{width:64px;height:64px;object-fit:cover;border-radius:6px;cursor:pointer}
+    .placeMeta{flex:1}
+    .placeMeta h3{margin:0;font-size:1rem}
+    .placeMeta p{margin:4px 0 0;font-size:0.9rem;color:var(--muted)}
+    .controls{display:flex;gap:8px;margin:10px 0}
+    .btn{background:var(--accent);color:#fff;border:0;padding:8px 10px;border-radius:8px;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(200,90,120,0.12)}
+    .small{padding:6px 8px;font-size:0.9rem}
 
-        #caption-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 70%; font-size: 1.8rem; font-style: italic; color: #ffebf2; text-shadow: 0 0 20px rgba(255, 51, 119, 0.6); opacity: 0; transition: opacity 0.8s; pointer-events: none; line-height: 1.4; }
-        #instrucciones { position: absolute; top: 140px; width: 100%; text-align: center; color: rgba(255,255,255,0.3); font-size: 9px; letter-spacing: 4px; text-transform: uppercase;}
-    </style>
+    /* Modal form */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:999}
+    .modal[aria-hidden="false"]{display:flex}
+    .modalCard{background:#fff;padding:16px;border-radius:10px;width:360px;box-shadow:0 12px 40px rgba(0,0,0,0.2)}
+    .modalCard h3{margin:0 0 8px}
+    .field{margin-bottom:8px}
+    .field label{display:block;font-size:0.85rem;color:var(--muted);margin-bottom:4px}
+    .field input[type="text"], .field input[type="date"], .field textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #eee}
+    .field textarea{min-height:80px;resize:vertical}
+    .row{display:flex;gap:8px}
+    .hint{font-size:0.85rem;color:var(--muted);margin-top:6px}
+
+    /* Lightbox */
+    .lightbox{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);z-index:1000}
+    .lightbox[aria-hidden="false"]{display:flex}
+    .lb-close{position:absolute;top:18px;right:18px;background:transparent;border:0;color:#fff;font-size:22px;cursor:pointer}
+    .lightbox img{max-width:92vw;max-height:78vh;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.6)}
+    .lightbox p{color:#fff;margin-top:10px;text-align:center}
+
+    /* small responsive */
+    @media(max-width:900px){
+      main{flex-direction:column}
+      .list{width:100%}
+    }
+
+    /* custom heart icon for markers */
+    .heart-icon{font-size:20px;line-height:1;text-shadow:0 1px 0 #fff}
+  </style>
 </head>
 <body>
+  <header>
+    <h1>Mapa de nuestros recuerdos</h1>
+    <p>Haz clic en el mapa para añadir un lugar · Guarda fotos desde tu equipo</p>
+  </header>
 
-<div id="loader">
-    <div class="loader-heart">❤</div>
-    <p style="margin-top: 25px; letter-spacing: 6px; font-size: 10px; color: #ff3377;">ALINEANDO LAS ESTRELLAS PARA TI</p>
-</div>
+  <main>
+    <div id="map"></div>
 
-<div id="ui-layer">
-    <div class="header">
-        <p class="fecha-universo">Desde el 30 de Octubre</p>
-        <h1>Para Mi Natasha</h1>
+    <aside class="list">
+      <h2>Lugares</h2>
+      <div class="controls">
+        <button id="centerAll" class="btn small">Centrar todos</button>
+        <button id="toggleLine" class="btn ghost small">Conectar puntos</button>
+      </div>
+      <ul id="placesList"></ul>
+      <p class="hint">Los datos se guardan en tu navegador. Si quieres mover el repo a otro equipo, copia el contenido de "Exportar" en la consola.</p>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="exportBtn" class="btn small">Exportar JSON</button>
+        <button id="importBtn" class="btn ghost small">Importar JSON</button>
+        <input id="importFile" type="file" accept="application/json" style="display:none">
+      </div>
+    </aside>
+  </main>
+
+  <!-- Modal para añadir lugar -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Añadir lugar</h3>
+      <div class="field">
+        <label>Título</label>
+        <input id="inpTitle" type="text" placeholder="Ej. Nuestra primera cita">
+      </div>
+      <div class="field">
+        <label>Fecha</label>
+        <input id="inpDate" type="date">
+      </div>
+      <div class="field">
+        <label>Nota</label>
+        <textarea id="inpNote" placeholder="Una frase corta sobre este recuerdo"></textarea>
+      </div>
+      <div class="field">
+        <label>Foto</label>
+        <input id="inpFile" type="file" accept="image/*">
+        <div id="preview" style="margin-top:8px"></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+        <button id="cancelBtn" class="btn ghost">Cancelar</button>
+        <button id="saveBtn" class="btn">Guardar</button>
+      </div>
     </div>
-    
-    <div id="instrucciones">Toca el corazón para descubrir mensajes</div>
-    <div id="caption-box"></div>
+  </div>
 
-    <div class="contador-card">
-        <div class="label-timer">Nuestra Historia Lleva</div>
-        <div id="timer">Cargando tiempo...</div>
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" aria-hidden="true">
+    <button id="lbClose" class="lb-close">✕</button>
+    <div style="text-align:center">
+      <img id="lbImg" alt="Foto ampliada" />
+      <p id="lbCaption"></p>
     </div>
-</div>
+  </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script>
-let scene, camera, renderer, starSystem, heartSystem, shootingStar;
-let clock = new THREE.Clock();
+  <script>
+    // ----- Datos y utilidades -----
+    const STORAGE_KEY = 'mapa_recuerdos_v1';
+    let places = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || [
+      // Ejemplos iniciales que puedes borrar
+      {
+        id: Date.now(),
+        title: "Nuestra primera cita",
+        date: "2021-06-12",
+        lat: -0.180653,
+        lng: -78.467834,
+        img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+        note: "Café, risas y promesas pequeñas."
+      },
+      {
+        id: Date.now()+1,
+        title: "Viaje a la playa",
+        date: "2022-02-20",
+        lat: -0.953,
+        lng: -80.7,
+        img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+        note: "Atardecer inolvidable."
+      }
+    ];
 
-function init() {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 100;
+    // Guardar en localStorage
+    function savePlaces(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(places)); }
 
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    document.body.appendChild(renderer.domElement);
+    // ----- Inicializar mapa -----
+    const map = L.map('map', {zoomControl:true}).setView([places[0].lat, places[0].lng], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-    // 1. Fondo de Estrellas Profundo
-    const starGeo = new THREE.BufferGeometry();
-    const starPos = [];
-    for(let i=0; i<20000; i++) starPos.push((Math.random()-0.5)*500, (Math.random()-0.5)*500, (Math.random()-0.5)*500);
-    starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
-    starSystem = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.15, transparent: true, opacity: 0.8}));
-    scene.add(starSystem);
+    // Icono corazón
+    const heartIcon = L.divIcon({ html: '💖', className: 'heart-icon', iconSize: [28,28], iconAnchor: [14,28] });
 
-    // 2. Corazón de Partículas (Mejorado)
-    heartSystem = createHeart();
-    scene.add(heartSystem);
+    // Contenedores
+    const listEl = document.getElementById('placesList');
+    const modal = document.getElementById('modal');
+    const inpTitle = document.getElementById('inpTitle');
+    const inpDate = document.getElementById('inpDate');
+    const inpNote = document.getElementById('inpNote');
+    const inpFile = document.getElementById('inpFile');
+    const preview = document.getElementById('preview');
+    const saveBtn = document.getElementById('saveBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lbImg');
+    const lbCaption = document.getElementById('lbCaption');
+    const lbClose = document.getElementById('lbClose');
+    const toggleLineBtn = document.getElementById('toggleLine');
+    const centerAllBtn = document.getElementById('centerAll');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importFile = document.getElementById('importFile');
 
-    // 3. Estrella Fugaz (Idea #2)
-    const sGeo = new THREE.BufferGeometry();
-    sGeo.setAttribute('position', new THREE.Float32BufferAttribute([0,0,0], 3));
-    shootingStar = new THREE.Points(sGeo, new THREE.PointsMaterial({color: 0xffffff, size: 1.5, transparent: true, blending: THREE.AdditiveBlending}));
-    scene.add(shootingStar);
-    resetShootingStar();
+    let markers = {};
+    let polyline = null;
+    let lastClickLatLng = null;
+    let pendingImageData = null;
 
-    animate();
-    setTimeout(() => {
-        document.getElementById('loader').style.opacity = '0';
-        setTimeout(() => document.getElementById('loader').remove(), 1000);
-    }, 2500);
+    // Renderizar todos los marcadores y la lista
+    function renderAll(){
+      // limpiar marcadores existentes
+      Object.values(markers).forEach(m => map.removeLayer(m));
+      markers = {};
+      listEl.innerHTML = '';
 
-    window.addEventListener('click', onInteract);
-}
+      places.forEach(p => {
+        const marker = L.marker([p.lat, p.lng], {icon: heartIcon}).addTo(map);
+        const popupHtml = `
+          <div style="max-width:240px">
+            <strong>${escapeHtml(p.title)}</strong><br/>
+            <small style="color:#666">${p.date}</small>
+            <div style="margin-top:8px">
+              <img src="${p.img}" alt="${escapeHtml(p.title)}" style="width:100%;border-radius:6px;cursor:pointer" data-id="${p.id}">
+            </div>
+            <p style="margin:8px 0 0;color:#444">${escapeHtml(p.note)}</p>
+          </div>
+        `;
+        marker.bindPopup(popupHtml);
+        markers[p.id] = marker;
 
-function createHeart() {
-    const count = 4000;
-    const geo = new THREE.BufferGeometry();
-    const pos = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-        const t = Math.random() * Math.PI * 2;
-        const x = 16 * Math.pow(Math.sin(t), 3);
-        const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
-        pos[i*3] = x * 1.5;
-        pos[i*3+1] = y * 1.5;
-        pos[i*3+2] = (Math.random() - 0.5) * 10;
+        // lista lateral
+        const li = document.createElement('li');
+        li.className = 'placeItem';
+        li.innerHTML = `
+          <img src="${p.img}" alt="${escapeHtml(p.title)}" data-id="${p.id}">
+          <div class="placeMeta">
+            <h3>${escapeHtml(p.title)}</h3>
+            <p>${p.date} · ${escapeHtml(p.note)}</p>
+          </div>
+        `;
+        // click imagen abre lightbox
+        li.querySelector('img').addEventListener('click', () => openLightbox(p));
+        // click meta centra y abre popup
+        li.querySelector('.placeMeta').addEventListener('click', () => {
+          map.setView([p.lat, p.lng], 13, {animate:true});
+          marker.openPopup();
+        });
+        listEl.appendChild(li);
+      });
+
+      drawPolyline();
     }
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    return new THREE.Points(geo, new THREE.PointsMaterial({color: 0xff3377, size: 0.5, blending: THREE.AdditiveBlending, transparent: true}));
-}
 
-function resetShootingStar() {
-    shootingStar.position.set((Math.random()-0.5)*200, 100, (Math.random()-0.5)*100);
-    gsap.to(shootingStar.position, {
-        x: shootingStar.position.x - 200,
-        y: -100,
-        duration: 1.5,
-        delay: 5 + Math.random() * 10,
-        onComplete: resetShootingStar
+    // Escape simple para evitar inyección en popups
+    function escapeHtml(str){ return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
+
+    // Lightbox
+    function openLightbox(place){
+      lbImg.src = place.img;
+      lbImg.alt = place.title;
+      lbCaption.textContent = `${place.title} — ${place.date}`;
+      lb.setAttribute('aria-hidden','false');
+    }
+    function closeLightbox(){ lb.setAttribute('aria-hidden','true'); lbImg.src=''; }
+    lbClose.addEventListener('click', closeLightbox);
+    lb.addEventListener('click', (e) => { if(e.target === lb) closeLightbox(); });
+
+    // Añadir marcador al hacer clic en el mapa
+    map.on('click', function(e){
+      lastClickLatLng = e.latlng;
+      openModalForNew();
     });
-}
 
-const frases = [
-    "Eres lo mejor que me pasó en 2025 ❤️",
-    "Apenas llevamos 140 días y ya te quiero para siempre",
-    "30 de Octubre: El día que mi suerte cambió",
-    "Gracias por cada sonrisa en este universo",
-    "Natasha, eres mi estrella favorita"
-];
-
-function onInteract(e) {
-    const mouse = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
-    const ray = new THREE.Raycaster();
-    ray.setFromCamera(mouse, camera);
-    
-    if(ray.intersectObject(heartSystem).length > 0) {
-        const cap = document.getElementById('caption-box');
-        cap.innerText = frases[Math.floor(Math.random()*frases.length)];
-        cap.style.opacity = '1';
-        gsap.to(heartSystem.scale, {x: 1.3, y: 1.3, z: 1.3, duration: 0.4, yoyo: true, repeat: 1});
-        setTimeout(() => cap.style.opacity = '0', 3500);
+    // Modal control
+    function openModalForNew(){
+      inpTitle.value = '';
+      inpDate.value = '';
+      inpNote.value = '';
+      inpFile.value = '';
+      preview.innerHTML = '';
+      pendingImageData = null;
+      modal.setAttribute('aria-hidden','false');
     }
-}
+    function closeModal(){ modal.setAttribute('aria-hidden','true'); }
 
-function animate() {
-    requestAnimationFrame(animate);
-    const t = clock.getElapsedTime();
-    heartSystem.rotation.y += 0.005;
-    heartSystem.scale.setScalar(1 + Math.sin(t*2)*0.03);
-    starSystem.rotation.y += 0.0005;
-    renderer.render(scene, camera);
-}
+    cancelBtn.addEventListener('click', () => { closeModal(); });
 
-// CORRECCIÓN DE FECHA: 30 de Octubre 2025
-const inicio = new Date("October 30, 2025 00:00:00").getTime();
-setInterval(() => {
-    const ahora = new Date().getTime();
-    const dif = ahora - inicio;
-    const d = Math.floor(dif / 86400000);
-    const h = Math.floor((dif % 86400000) / 3600000);
-    const m = Math.floor((dif % 3600000) / 60000);
-    const s = Math.floor((dif % 60000) / 1000);
-    document.getElementById("timer").innerHTML = `${d}d ${h}h ${m}m ${s}s`;
-}, 1000);
+    // Previsualizar imagen subida
+    inpFile.addEventListener('change', (ev) => {
+      const f = ev.target.files[0];
+      if(!f) { preview.innerHTML=''; pendingImageData = null; return; }
+      const reader = new FileReader();
+      reader.onload = function(evt){
+        pendingImageData = evt.target.result; // base64
+        preview.innerHTML = `<img src="${pendingImageData}" style="width:100%;border-radius:6px">`;
+      };
+      reader.readAsDataURL(f);
+    });
 
-init();
+    // Guardar nuevo lugar
+    saveBtn.addEventListener('click', () => {
+      if(!lastClickLatLng){ alert('Selecciona un punto en el mapa primero.'); return; }
+      const title = inpTitle.value.trim() || 'Lugar sin título';
+      const date = inpDate.value || new Date().toISOString().slice(0,10);
+      const note = inpNote.value.trim() || '';
+      const img = pendingImageData || 'https://images.unsplash.com/photo-1503264116251-35a269479413?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder';
+      const newPlace = {
+        id: Date.now(),
+        title, date,
+        lat: lastClickLatLng.lat,
+        lng: lastClickLatLng.lng,
+        img, note
+      };
+      places.push(newPlace);
+      savePlaces();
+      renderAll();
+      closeModal();
+      lastClickLatLng = null;
+    });
 
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-</script>
+    // Popup image click delegation
+    map.on('popupopen', function(e){
+      const popupNode = e.popup.getElement();
+      if(!popupNode) return;
+      const img = popupNode.querySelector('img[data-id]');
+      if(img){
+        img.addEventListener('click', () => {
+          const id = Number(img.getAttribute('data-id'));
+          const place = places.find(x => x.id === id);
+          if(place) openLightbox(place);
+        });
+      }
+    });
+
+    // Center all markers
+    centerAllBtn.addEventListener('click', () => {
+      if(places.length === 0) return;
+      const latlngs = places.map(p => [p.lat, p.lng]);
+      const bounds = L.latLngBounds(latlngs);
+      map.fitBounds(bounds.pad(0.2));
+    });
+
+    // Polyline toggle
+    toggleLineBtn.addEventListener('click', () => {
+      const on = toggleLineBtn.classList.toggle('active');
+      toggleLineBtn.textContent = on ? 'Desconectar puntos' : 'Conectar puntos';
+      drawPolyline();
+    });
+
+    function drawPolyline(){
+      if(polyline){ map.removeLayer(polyline); polyline = null; }
+      if(toggleLineBtn.classList.contains('active') && places.length>1){
+        const latlngs = places.map(p => [p.lat, p.lng]);
+        polyline = L.polyline(latlngs, {color: '#c85a7a', weight: 4, opacity: 0.8}).addTo(map);
+      }
+    }
+
+    // Exportar e importar JSON (import usa input file)
+    exportBtn.addEventListener('click', () => {
+      const data = JSON.stringify(places, null, 2);
+      // Mostrar en ventana emergente para copiar
+      const w = window.open('', '_blank', 'noopener,noreferrer');
+      w.document.write('<pre style="white-space:pre-wrap;word-break:break-word;font-family:monospace;padding:16px">'+escapeHtml(data)+'</pre>');
+      w.document.title = 'Exportar mapa de recuerdos JSON';
+    });
+
+    importBtn.addEventListener('click', () => importFile.click());
+    importFile.addEventListener('change', (e) => {
+      const f = e.target.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = function(evt){
+        try{
+          const imported = JSON.parse(evt.target.result);
+          if(Array.isArray(imported)){
+            places = imported;
+            savePlaces();
+            renderAll();
+            alert('Importación completada');
+          } else alert('JSON inválido');
+        }catch(err){ alert('Error leyendo JSON'); }
+      };
+      reader.readAsText(f);
+    });
+
+    // Inicializar render
+    renderAll();
+
+    // Helper para accesibilidad: cerrar modal con ESC
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape'){
+        if(modal.getAttribute('aria-hidden') === 'false') closeModal();
+        if(lb.getAttribute('aria-hidden') === 'false') closeLightbox();
+      }
+    });
+
+    // Nota: si quieres borrar todo, abre la consola y ejecuta:
+    // localStorage.removeItem('mapa_recuerdos_v1'); location.reload();
+  </script>
 </body>
 </html>
