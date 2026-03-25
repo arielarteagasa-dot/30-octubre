@@ -182,11 +182,26 @@ document.body.appendChild(h);
 setTimeout(()=>h.remove(),8000);
 },300);
 
-/* música */
+/* música mejorada */
 function toggleMusic(){
 let m=document.getElementById("music");
-m.play();
+
+m.volume = 0.5;
+
+m.play().then(()=>{
+document.getElementById("musicBtn").innerText="🎶 Sonando...";
+}).catch(()=>{
+alert("Toca la pantalla otra vez para activar la música ❤️");
+});
 }
+
+/* activar música al tocar pantalla */
+document.body.addEventListener("click", ()=>{
+let m=document.getElementById("music");
+if(m.paused){
+m.play().catch(()=>{});
+}
+});
 
 /* frases */
 function show(n){
@@ -196,7 +211,7 @@ let c=document.getElementById("content");
 if(n==1)c.innerHTML="Eres lo mejor que me ha pasado ❤️";
 if(n==2)c.innerHTML="Mi lugar favorito eres tú 🌍";
 if(n==3)c.innerHTML="Vale por besos ilimitados 💋";
-if(n==4)c.innerHTML=`<img src="foto.jpg" width="100%"><p>Nuestro recuerdo 💖</p>`;
+if(n==4)c.innerHTML=`<img src="foto.jpg" style="width:100%; border-radius:10px; box-shadow:0 0 15px rgba(0,0,0,0.5);"><p>Nuestro recuerdo 💖</p>`;
 if(n==5)c.innerHTML="Quiero toda una vida contigo 💍";
 
 c.innerHTML+="<br><button onclick='closeM()'>Cerrar</button>";
