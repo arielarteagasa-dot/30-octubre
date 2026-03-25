@@ -3,190 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Para mi estrella favorita</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+    <title>Para el amor de mi vida</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Quicksand:wght@300;500&display=swap" rel="stylesheet">
     
     <style>
-        /* Diseño del Espacio */
+        /* --- EL ESPACIO PROFUNDO --- */
         body {
             margin: 0;
             padding: 0;
-            background: radial-gradient(circle at bottom, #1b2735 0%, #090a0f 100%);
+            background: linear-gradient(to bottom, #020111 10%, #20124d 50%, #000022 100%);
             height: 100vh;
             color: white;
-            font-family: 'Montserrat', sans-serif;
-            overflow: hidden; /* Evita que se mueva la pantalla */
+            font-family: 'Quicksand', sans-serif;
+            overflow: hidden;
             position: relative;
         }
 
-        /* Título y Contador Flotante */
+        /* --- LAS ESTRELLAS DEL FONDO --- */
+        .estrella-fondo {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: titilar infinite alternate;
+            z-index: 1;
+        }
+        @keyframes titilar {
+            0% { opacity: 0.2; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 5px white; }
+        }
+
+        /* --- ESTRELLA FUGAZ --- */
+        .estrella-fugaz {
+            position: absolute;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,1));
+            animation: fugaz 6s linear infinite;
+            z-index: 2;
+            opacity: 0;
+            transform: rotate(-45deg);
+        }
+        @keyframes fugaz {
+            0% { top: -10%; left: 80%; opacity: 1; }
+            20% { top: 110%; left: -20%; opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        /* --- ENCABEZADO Y CONTADOR --- */
         .encabezado {
             text-align: center;
             position: absolute;
-            top: 10%;
+            top: 8%;
             width: 100%;
             z-index: 10;
-            animation: flotar 4s ease-in-out infinite;
+            animation: flotarSuave 5s ease-in-out infinite;
         }
-
         h1 {
-            font-family: 'Cinzel', serif;
-            font-size: 2.5em;
+            font-family: 'Playfair Display', serif;
+            font-size: 3em;
             color: #fce788;
-            text-shadow: 0 0 10px rgba(252, 231, 136, 0.5);
+            text-shadow: 0 0 20px rgba(252, 231, 136, 0.6);
             margin-bottom: 5px;
+            font-style: italic;
         }
-
         .contador-estelar {
-            font-size: 1.2em;
+            font-size: 1.3em;
             letter-spacing: 2px;
-            color: #d1d5db;
+            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: inline-block;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        @keyframes flotar {
+        @keyframes flotarSuave {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-15px); }
         }
 
-        /* Estrellas Interactivas (Las sorpresas) */
+        /* --- BOTÓN DE MÚSICA --- */
+        .btn-musica {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            font-family: 'Quicksand', sans-serif;
+            transition: 0.3s;
+        }
+        .btn-musica:hover { background: rgba(255, 255, 255, 0.3); }
+
+        /* --- ESTRELLAS MÁGICAS INTERACTIVAS --- */
         .estrella-magica {
             position: absolute;
-            width: 25px;
-            height: 25px;
-            background-color: #fff;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #fff, #fce788);
             border-radius: 50%;
-            box-shadow: 0 0 20px 5px #fce788;
+            box-shadow: 0 0 20px 5px rgba(252, 231, 136, 0.8);
             cursor: pointer;
-            animation: palpitar 2s infinite alternate;
-            z-index: 5;
-            transition: transform 0.3s;
+            animation: latir 2s infinite alternate;
+            z-index: 15;
+            transition: 0.3s;
+        }
+        .estrella-magica:hover { transform: scale(1.6); box-shadow: 0 0 40px 15px rgba(252, 231, 136, 1); }
+        @keyframes latir {
+            0% { transform: scale(0.9); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 1; }
         }
 
-        .estrella-magica:hover {
-            transform: scale(1.5);
-        }
+        #est1 { top: 35%; left: 15%; }
+        #est2 { top: 65%; left: 25%; }
+        #est3 { top: 45%; left: 75%; }
+        #est4 { top: 75%; left: 65%; }
 
-        @keyframes palpitar {
-            0% { box-shadow: 0 0 10px 2px #fce788, 0 0 20px 5px rgba(255,255,255,0.8); }
-            100% { box-shadow: 0 0 30px 10px #fce788, 0 0 40px 10px rgba(255,255,255,1); }
-        }
-
-        /* Posiciones de las estrellas en el cielo */
-        #estrella1 { top: 40%; left: 20%; }
-        #estrella2 { top: 60%; left: 70%; }
-        #estrella3 { top: 30%; left: 80%; }
-        #estrella4 { top: 75%; left: 30%; }
-
-        /* Modal (El mensaje que se abre) */
+        /* --- MODAL EFECTO CRISTAL (GLASSMORPHISM) --- */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.6);
             z-index: 100;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
         }
-
         .modal-contenido {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            padding: 40px;
-            border-radius: 15px;
-            border: 1px solid #fce788;
-            text-align: center;
-            max-width: 80%;
-            box-shadow: 0 0 30px rgba(252, 231, 136, 0.3);
-            animation: aparecer 0.5s ease-out;
-        }
-
-        @keyframes aparecer {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .modal h2 {
-            font-family: 'Cinzel', serif;
-            color: #fce788;
-        }
-
-        .cerrar {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: transparent;
-            color: #fce788;
-            border: 1px solid #fce788;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
-            transition: all 0.3s;
-        }
-
-        .cerrar:hover {
-            background-color: #fce788;
-            color: #0f172a;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="encabezado">
-        <h1>Mi Universo Eres Tú</h1>
-        <div class="contador-estelar" id="contador">Calculando nuestro viaje...</div>
-        <p style="font-size: 0.9em; opacity: 0.7; margin-top: 20px;">Toca las estrellas más brillantes para descubrir un secreto.</p>
-    </div>
-
-    <div class="estrella-magica" id="estrella1" onclick="abrirMensaje('Recuerdo #1', 'La primera vez que te vi, supe que mi vida iba a cambiar. Eres mi casualidad más bonita.')"></div>
-    
-    <div class="estrella-magica" id="estrella2" onclick="abrirMensaje('Lo que más amo de ti', 'Tu forma de hacerme reír y cómo iluminas cualquier lugar al que llegas. No hay nadie como tú.')"></div>
-    
-    <div class="estrella-magica" id="estrella3" onclick="abrirMensaje('Nuestra Promesa', 'Prometo cuidarte, escucharte y elegirte todos los días. Sin importar lo que pase.')"></div>
-    
-    <div class="estrella-magica" id="estrella4" onclick="abrirMensaje('¡Tu Sorpresa!', 'Ya que tocaste todas las estrellas... ¡Prepárate! Hoy te invito a cenar a tu lugar favorito. Te amo.')"></div>
-
-    <div class="modal" id="miModal">
-        <div class="modal-contenido">
-            <h2 id="titulo-mensaje">Título</h2>
-            <p id="texto-mensaje">Texto del mensaje de la estrella.</p>
-            <button class="cerrar" onclick="cerrarMensaje()">Cerrar</button>
-        </div>
-    </div>
-
-    <script>
-        // --- CONTADOR: INICIA EL 30 DE OCTUBRE DE 2025 ---
-        const fechaInicio = new Date('October 30, 2025 00:00:00').getTime();
-
-        function actualizarContador() {
-            const ahora = new Date().getTime();
-            const diferencia = ahora - fechaInicio;
-
-            // Si por alguna razón abren la página ANTES de la fecha
-            if (diferencia < 0) {
-                document.getElementById("contador").innerHTML = "Faltan días para nuestra gran fecha...";
-                return;
-            }
-
-            const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
-            const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
-            const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
-
-            document.getElementById("contador").innerHTML = 
-                `${dias} días, ${horas} horas, ${minutos} minutos y ${segundos} segundos de pura magia.`;
-        }
-        setInterval(actualizarContador, 1000);
-        actualizarContador(); // Ejecutar de inmediato
-
-        // --- LÓGICA DE LOS MENSAJES (MODAL) ---
-        function abrirMensaje(titulo, texto) {
-            document.getElementById("titulo-mensaje").innerText = titulo;
-            document.getElementById("texto-mensaje").innerText = texto;
-            document.getElementById("miModal").style.display = "flex";
-        }
-
-        function cerrarMensaje() {
-            document.getElementById("miModal").style.display = "none";
-        }
-    </script>
-</body>
-</html>
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.
