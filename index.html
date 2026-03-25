@@ -6,22 +6,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Para Ti ❤️</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
 
 <style>
 body{
 margin:0;
 height:100vh;
-background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-color:white;
-font-family:'Montserrat',sans-serif;
 display:flex;
 justify-content:center;
 align-items:center;
+background:linear-gradient(135deg,#141e30,#243b55);
+color:white;
+font-family:'Poppins',sans-serif;
 overflow:hidden;
 }
 
-/* PANTALLA INICIAL */
+/* PANTALLA INICIO */
 #start{
 position:fixed;
 width:100%;
@@ -36,29 +36,29 @@ z-index:10;
 }
 
 #start h1{
-font-family:'Dancing Script';
+font-family:'Great Vibes';
 font-size:3rem;
 color:#ff6b81;
 }
 
-#heart{
+.heart{
 font-size:5rem;
-animation:beat 1s infinite;
+animation:latir 1s infinite;
 }
 
-@keyframes beat{
+@keyframes latir{
 50%{transform:scale(1.2);}
 }
 
 /* CONTENIDO */
-#content{
+#main{
 display:none;
 text-align:center;
 padding:20px;
 }
 
 .title{
-font-family:'Dancing Script';
+font-family:'Great Vibes';
 font-size:3rem;
 margin-bottom:10px;
 }
@@ -80,7 +80,7 @@ cursor:pointer;
 }
 
 /* CARTA */
-#letter{
+#carta{
 display:none;
 margin-top:20px;
 background:rgba(255,255,255,0.1);
@@ -96,13 +96,13 @@ to{opacity:1;}
 }
 
 /* CORAZONES */
-.heart{
+.corazon{
 position:absolute;
 color:#ff6b81;
-animation:fall linear;
+animation:caer linear;
 }
 
-@keyframes fall{
+@keyframes caer{
 to{transform:translateY(100vh);opacity:0;}
 }
 </style>
@@ -112,29 +112,29 @@ to{transform:translateY(100vh);opacity:0;}
 
 <!-- INICIO -->
 <div id="start">
-<div id="heart">❤️</div>
-<h1>Toca para comenzar</h1>
+<div class="heart">❤️</div>
+<h1>Tócame...</h1>
 </div>
 
-<!-- AUDIO -->
+<!-- 🎵 AUDIO ONLINE (CLAVE) -->
 <audio id="music" loop>
-<source src="cancion.mp3" type="audio/mpeg">
+<source src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b9bce8b.mp3" type="audio/mpeg">
 </audio>
 
 <!-- CONTENIDO -->
-<div id="content">
+<div id="main">
 <div class="title">Para Ti ❤️</div>
-<div class="text">Tengo algo que decirte...</div>
+<div class="text">Hay algo que quiero decirte...</div>
 
-<button onclick="mostrarCarta()">Abrir 💌</button>
+<button onclick="mostrarCarta()">Abrir carta 💌</button>
 
-<div id="letter">
+<div id="carta">
 <p>
-Desde que llegaste a mi vida todo cambió...  
-cada día contigo es especial.  
+No sé cómo explicarlo…  
+pero desde que estás en mi vida, todo es mejor.  
 <br><br>
-Gracias por existir, por hacerme feliz  
-y por ser mi lugar favorito.  
+Eres mi paz, mi alegría  
+y la persona que quiero siempre a mi lado.  
 <br><br>
 <b>Te amo ❤️</b>
 </p>
@@ -143,40 +143,41 @@ y por ser mi lugar favorito.
 
 <script>
 const start = document.getElementById("start");
-const content = document.getElementById("content");
+const main = document.getElementById("main");
 const music = document.getElementById("music");
 
-/* INICIO + AUDIO SEGURO */
+/* 🔥 INICIO REAL */
 start.addEventListener("click", () => {
-start.style.display = "none";
-content.style.display = "block";
+start.style.display="none";
+main.style.display="block";
 
-/* 🔥 ESTO GARANTIZA QUE FUNCIONE */
+/* ESTO HACE QUE FUNCIONE SI O SI */
 music.currentTime = 0;
-music.volume = 1;
 
-music.play().catch(() => {
-alert("Toca otra vez para activar la música ❤️");
+music.play().then(()=>{
+console.log("Audio funcionando");
+}).catch(()=>{
+alert("Si no suena, toca otra vez ❤️");
 });
 });
 
-/* MOSTRAR CARTA */
+/* CARTA */
 function mostrarCarta(){
-document.getElementById("letter").style.display="block";
-explosion();
+document.getElementById("carta").style.display="block";
+lluviaCorazones();
 }
 
-/* EFECTO CORAZONES */
-function explosion(){
+/* EFECTO */
+function lluviaCorazones(){
 setInterval(()=>{
-let h=document.createElement("div");
-h.className="heart";
-h.innerText="❤️";
-h.style.left=Math.random()*100+"vw";
-h.style.top="-20px";
-h.style.animationDuration=(Math.random()*2+2)+"s";
-document.body.appendChild(h);
-setTimeout(()=>h.remove(),4000);
+let c=document.createElement("div");
+c.className="corazon";
+c.innerText="❤️";
+c.style.left=Math.random()*100+"vw";
+c.style.top="-10px";
+c.style.animationDuration=(Math.random()*2+2)+"s";
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),4000);
 },200);
 }
 </script>
