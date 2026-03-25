@@ -21,13 +21,14 @@
             font-family: 'Quicksand', sans-serif;
             color: white;
             perspective: 1000px;
-            background: #050505; /* Fondo noche profunda */
+            background: #050505;
         }
 
-        /* --- PANTALLA DE INICIO (Necesaria para que suene la música) --- */
+        /* PANTALLA DE INICIO REFORZADA */
         #start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #050505; z-index: 9999;
+            background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
+            z-index: 9999;
             display: flex; align-items: center; justify-content: center; flex-direction: column;
             cursor: pointer; text-align: center; padding: 20px;
         }
@@ -35,10 +36,21 @@
         #start-screen h1 {
             font-family: 'Dancing Script', cursive;
             font-size: 3rem; color: var(--love);
-            animation: pulse 2s infinite;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 107, 129, 0.5);
         }
 
-        /* --- FONDO DE NEBULOSA ASOMBROSO (Dinámico y Full Movimiento) --- */
+        .heart-icon {
+            font-size: 5rem;
+            animation: beat 1.2s infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
         #nebula {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -2;
@@ -53,7 +65,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* --- PARTÍCULAS BRILLANTES (Estrellas Flotantes) --- */
         .particle {
             position: absolute;
             background: white; border-radius: 50%;
@@ -65,7 +76,6 @@
             to { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
         }
 
-        /* --- INTERFAZ FLOTANTE (UI) --- */
         #ui-container {
             position: absolute; top: 5%; width: 100%; text-align: center;
             z-index: 10; pointer-events: none;
@@ -78,30 +88,19 @@
             margin: 0; animation: floatTitle 3s ease-in-out infinite;
         }
 
-        @keyframes floatTitle {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
         #contador {
-            margin-top: 10px; font-weight: 700; letter-spacing: 1px;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.2);
+            margin-top: 10px; font-weight: 700; font-size: 1rem;
+            background: rgba(255, 255, 255, 0.15);
             padding: 10px 20px; border-radius: 50px;
-            backdrop-filter: blur(5px); display: inline-block;
-            box-shadow: 0 0 15px rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(8px); display: inline-block;
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
-        /* --- FRASES BONITAS EN EL RASTRO (Más lentas y legibles) --- */
         .phrase-trail {
-            position: absolute;
-            color: white; pointer-events: none;
+            position: absolute; color: white; pointer-events: none;
             font-weight: bold; font-size: 1.2rem;
             animation: fadeUpSlow 2.5s ease-out forwards;
-            z-index: 1000; 
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.9), 0 0 10px var(--pink);
-            white-space: nowrap;
+            z-index: 1000; text-shadow: 2px 2px 8px rgba(0,0,0,0.9), 0 0 10px var(--pink);
         }
 
         @keyframes fadeUpSlow {
@@ -110,7 +109,6 @@
             100% { transform: translateY(-80px) scale(1); opacity: 0; }
         }
 
-        /* --- OBJETOS INTERACTIVOS (Búsqueda Divertida) --- */
         .interactive-obj {
             position: absolute; cursor: pointer; z-index: 5;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -127,59 +125,47 @@
             border-radius: 50px; font-family: 'Dancing Script';
             font-size: 2rem; color: #333; cursor: pointer;
             box-shadow: 0 0 30px var(--gold); z-index: 100;
-            animation: pulse 2s infinite;
+            animation: pulseFinal 2s infinite;
         }
 
-        @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
+        @keyframes pulseFinal { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
 
-        /* --- MODALES (Ventanas Emergentes) --- */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 100;
-            align-items: center; justify-content: center; backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.92); z-index: 1000;
+            align-items: center; justify-content: center; backdrop-filter: blur(12px);
         }
 
         .modal-content {
             background: white; padding: 25px; border-radius: 20px;
             text-align: center; color: #333; max-width: 320px;
-            box-shadow: 0 0 30px rgba(255,255,255,0.2);
             animation: popIn 0.4s ease-out;
         }
 
         @keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
         
-        .modal img { width: 100%; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .modal-text { margin-top: 20px; font-weight: 500; font-size: 1.1rem; line-height: 1.5; }
+        .modal img { width: 100%; border-radius: 10px; margin-bottom: 15px; }
         
-        .trivia-btn {
-            display: block; width: 100%; padding: 10px; margin: 5px 0;
-            border: 1px solid #ddd; border-radius: 10px; background: #f9f9f9;
-            cursor: pointer; font-family: inherit; transition: 0.3s;
-        }
-        .trivia-btn:hover { background: var(--purple); color: white; }
-
         .btn-close {
             background: var(--love); color: white; border: none;
-            padding: 10px 25px; border-radius: 20px; font-weight: 700;
+            padding: 12px 25px; border-radius: 20px; font-weight: 700;
             cursor: pointer; margin-top: 20px; width: 100%;
         }
 
-        /* --- EFECTO INCREÍBLE AL CERRAR (Lluvia Infinita) --- */
         .falling-magic {
             position: absolute; top: -50px; pointer-events: none; z-index: 500;
             animation: fallMagic linear infinite;
         }
 
-        @keyframes fallMagic {
-            to { transform: translateY(110vh) rotate(360deg); }
-        }
+        @keyframes fallMagic { to { transform: translateY(110vh) rotate(360deg); } }
     </style>
 </head>
 <body onmousemove="createTrail(event)" ontouchmove="createTrailTouch(event)">
 
     <div id="start-screen" onclick="startExperience()">
-        <h1>Toca para abrir tu sorpresa 💖</h1>
-        <p style="font-size: 1.2rem; margin-top: 10px; opacity: 0.8;">Sube el volumen 🎵</p>
+        <div class="heart-icon">❤️</div>
+        <h1>Para mi niña hermosa...</h1>
+        <p style="font-size: 1.2rem; color: #aaa;">(Toca la pantalla para entrar)</p>
     </div>
 
     <audio id="bg-music" loop>
@@ -190,8 +176,8 @@
 
     <div id="ui-container">
         <h1>Nuestra Galaxia Mágica</h1>
-        <div id="contador">00d 00h 00m 00s</div>
-        <p style="opacity: 0.8; font-size: 0.9rem; margin-top: 15px; pointer-events: none;">Toca los 5 objetos flotantes ✨</p>
+        <div id="contador">Cargando momentos...</div>
+        <p style="opacity: 0.8; font-size: 0.9rem; margin-top: 15px;">Encuentra los 5 tesoros flotantes ✨</p>
     </div>
 
     <div class="interactive-obj" style="top:30%; left:20%;" id="obj1" onclick="showSurprise(1)">💖</div>
@@ -203,172 +189,107 @@
     <button id="final-letter-btn" onclick="showFinalLetter()">¡Tu Mensaje Secreto! 💌</button>
 
     <div class="modal" id="modal">
-        <div class="modal-content" id="modal-content">
-            </div>
+        <div class="modal-content" id="modal-content"></div>
     </div>
 
     <div class="modal" id="modal-final">
         <div class="modal-content" style="max-width: 450px; text-align: left;">
             <h2 style="font-family:'Dancing Script'; color:var(--love); text-align:center;">Mi gordita preciosa</h2>
-            <p class="modal-text" style="font-size:1rem;">
-                No puedo creer que ya haya pasado 5 meses a su lado desde ese 30 de octubre de 2025. Cada día a tu lado es una nueva experiencia increíble, llena de risas, apoyo y un amor que no para de crecer.<br><br>
-                Eres mi compañera, mi mejor amiga mi todo y el amor de mi vida. Gracias por hacerme tan feliz.<br><br>
-                Prometo seguir cuidándote y amándote todos los días, hoy es un día muy especial Eres lo más valioso que tengo.<br><br>
-                <b>Te amo infinitamente mi amor.</b>
+            <p style="font-size:1rem; line-height: 1.6;">
+                No puedo creer que ya hayan pasado 5 meses a tu lado desde ese 30 de octubre de 2025. Cada día es una nueva experiencia increíble, llena de risas, apoyo y un amor que no para de crecer.<br><br>
+                Eres mi compañera, mi mejor amiga, mi todo y el amor de mi vida. Gracias por hacerme tan feliz.<br><br>
+                Prometo seguir cuidándote y amándote todos los días. Eres lo más valioso que tengo.<br><br>
+                <b style="color:var(--love);">Te amo infinitamente mi amor.</b>
             </p>
-            <button class="btn-close" onclick="closeFinalLetter()">Te Amo ❤️ (Volver)</button>
+            <button class="btn-close" onclick="closeFinalLetter()">Te Amo ❤️</button>
         </div>
     </div>
 
     <script>
-        // --- 0. INICIAR EXPERIENCIA Y MÚSICA ---
+        const audio = document.getElementById('bg-music');
+
+        // FUNCIÓN CLAVE PARA LA MÚSICA
         function startExperience() {
             document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('bg-music').play();
+            // Intentar reproducir con manejo de errores
+            audio.play().catch(e => console.log("Audio bloqueado inicialmente"));
         }
 
-        // --- 1. CONFIGURACIÓN INICIAL ---
         const startDate = new Date('October 30, 2025 00:00:00').getTime();
         let objectsFound = new Set();
-        const totalObjects = 5;
 
-        // --- 2. FONDO Y EFECTOS ---
-        const body = document.body;
-
-        for (let i = 0; i < 80; i++) {
+        // PARTÍCULAS
+        for (let i = 0; i < 60; i++) {
             const p = document.createElement('div');
             p.className = 'particle';
-            p.style.width = p.style.height = Math.random() * 4 + 1 + 'px';
+            p.style.width = p.style.height = Math.random() * 3 + 1 + 'px';
             p.style.top = Math.random() * 100 + 'vh';
             p.style.left = Math.random() * 100 + 'vw';
-            p.style.animationDuration = Math.random() * 4 + 2 + 's';
-            p.style.animationDelay = Math.random() * 2 + 's';
-            body.appendChild(p);
+            p.style.animationDuration = Math.random() * 3 + 2 + 's';
+            document.body.appendChild(p);
         }
 
-        // --- 3. RASTRO DEL CURSOR CON FRASES ---
-        const frases = ["mi amor ❤️", "Mi gordita ☁️", "Mi caprichosita 🎀", "Mi tiquitita ✨", "Mi mujer 💍"];
-
+        // RASTRO
+        const frases = ["mi amor ❤️", "Mi gordita ☁️", "Mi vida ✨", "Te amo 💍"];
         function createTrail(e) {
-            // Bajamos la frecuencia de aparición para que no se encimen y se puedan leer bien
-            if (Math.random() > 0.06) return; 
-            
+            if (Math.random() > 0.08) return;
             const t = document.createElement('div');
             t.className = 'phrase-trail';
-            
             t.innerText = frases[Math.floor(Math.random() * frases.length)];
-            
-            t.style.left = e.pageX + 'px';
-            t.style.top = e.pageY + 'px';
-            
-            body.appendChild(t);
-            // Ahora duran 2.5 segundos antes de borrarse
-            setTimeout(() => t.remove(), 2500); 
+            t.style.left = (e.pageX || e.touches[0].pageX) + 'px';
+            t.style.top = (e.pageY || e.touches[0].pageY) + 'px';
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
         }
-        function createTrailTouch(e) { createTrail(e.touches[0]); }
+        function createTrailTouch(e) { createTrail(e); }
 
-        // --- 4. LÓGICA DE TIEMPO (CONTADOR) ---
+        // CONTADOR
         function updateCounter() {
-            const now = new Date().getTime();
-            const diff = now - startDate;
-            
-            if(diff < 0) {
-                document.getElementById('contador').innerHTML = "Faltan pocos días para nuestro día...";
-                return;
-            }
-
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
-            document.getElementById('contador').innerHTML = `Llevamos juntos: ${d}d ${h}h ${m}m ${s}s`;
+            const diff = new Date().getTime() - startDate;
+            const d = Math.floor(diff / 86400000);
+            const h = Math.floor((diff % 86400000) / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            document.getElementById('contador').innerHTML = `Juntos hace: ${d}d ${h}h ${m}m ${s}s`;
         }
         setInterval(updateCounter, 1000);
-        updateCounter();
 
-        // --- 5. LÓGICA DE JUEGO (BÚSQUEDA) ---
+        // SURPRESAS
         function showSurprise(id) {
+            // Refuerzo de música por si no inició antes
+            audio.play().catch(() => {});
+
             objectsFound.add(id);
             document.getElementById('obj'+id).style.opacity = '0.3'; 
-
             const mc = document.getElementById('modal-content');
-            let content = '';
+            let c = '';
 
-            switch(id) {
-                case 1: content = `<h3>Un Mensaje</h3><p class="modal-text">Eres el 'te amo' más sincero que he dicho. 💖</p>`; break;
-                case 2: content = `
-                        <h3>Mini-Trivia 🤔</h3><p class="modal-text"><b>¿Cuál fue nuestro primer viaje juntos?</b></p>
-                        <button class="trivia-btn" onclick="checkTrivia(true)">A la playa 🏖️</button>
-                        <button class="trivia-btn" onclick="checkTrivia(false)">Al centro comercial / Cine</button>
-                        <p id="trivia-feedback" style="margin-top:10px;"></p>
-                    `; break;
-                case 3: content = `
-                        <h3>Un Regalo Virtual 🎁</h3><p class="modal-text" style="color:var(--love);">¡Has ganado un Cupón de Amor!</p>
-                        <p class="modal-text">Vale por: Un beso de 10 segundos.</p>
-                        <p style="font-size:0.8rem; opacity:0.7;">(Toma captura 😉)</p>
-                    `; break;
-                case 4: content = `
-                        <h3>Nuestro Pergamino Mágico</h3>
-                        <img src="foto.jpg" alt="Foto Pergamino">
-                        <p class="modal-text">Este es mi recuerdo mas bonito contigo.</p>
-                    `; break;
-                case 5: content = `<h3>Para Mi Mujer 💍</h3><p class="modal-text">Eres la dueña de mi corazón por siempre. ¡Te amo!</p>`; break;
-            }
+            if(id==1) c = '<h3>Un Mensaje</h3><p>Eres el "te amo" más sincero de mi vida. 💖</p>';
+            if(id==2) c = '<h3>Trivia</h3><p>¿Cuál fue nuestro primer viaje? <br><br> <button onclick="alert(\'¡Correcto mi vida!\')" style="padding:10px; border-radius:10px; border:1px solid #ccc; cursor:pointer;">A la playa 🏖️</button></p>';
+            if(id==3) c = '<h3>¡Regalo! 🎁</h3><p>Vale por un beso de 10 segundos. (Toma captura)</p>';
+            if(id==4) c = '<h3>Recuerdo</h3><img src="foto.jpg" onerror="this.src=\'https://via.placeholder.com/300?text=Error+al+cargar+foto.jpg\'"><p>Mi momento favorito.</p>';
+            if(id==5) c = '<h3>Para ti 💍</h3><p>Eres la dueña de mi corazón.</p>';
 
-            if (id !== 2) {
-                content += `<button class="btn-close" onclick="closeModal()">Seguir Explorando</button>`;
-            }
-
-            mc.innerHTML = content;
+            mc.innerHTML = c + '<button class="btn-close" onclick="closeModal()">Continuar</button>';
             document.getElementById('modal').style.display = 'flex';
 
-            if(objectsFound.size === totalObjects) {
-                setTimeout(() => { document.getElementById('final-letter-btn').style.display = 'block'; }, 1000);
-            }
-        }
-
-        function checkTrivia(correct) {
-            const fb = document.getElementById('trivia-feedback');
-            const mc = document.getElementById('modal-content');
-            if (correct) {
-                fb.innerText = "¡Correcto mi vida! ❤️ No lo olvidaste.";
-                fb.style.color = '#2ecc71';
-                setTimeout(() => { 
-                    mc.innerHTML += `<button class="btn-close" onclick="closeModal()">Continuar</button>`;
-                }, 500);
-            } else {
-                fb.innerText = "¡Ups! Casi... Intenta de nuevo😘";
-                fb.style.color = '#e74c3c';
-            }
+            if(objectsFound.size === 5) document.getElementById('final-letter-btn').style.display = 'block';
         }
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
-
-        // --- 6. CARTA FINAL Y LLUVIA INFINITA ---
         function showFinalLetter() { document.getElementById('modal-final').style.display = 'flex'; }
         
         function closeFinalLetter() { 
-            const mc = document.getElementById('modal-final');
-            mc.style.display = 'none'; 
-            
-            // Iniciar lluvia constante y hermosa para que no se vea vacío
+            document.getElementById('modal-final').style.display = 'none'; 
             setInterval(() => {
                 const s = document.createElement('div');
                 s.className = 'falling-magic';
-                const emojis = ['✨', '❤️', '🌟', '💖', '🌸', '💘', '💫'];
-                s.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-                
-                // Posición y estilo aleatorio
-                s.style.left = (Math.random() * 100) + 'vw';
-                s.style.fontSize = (Math.random() * 20 + 10) + 'px';
-                s.style.animationDuration = (Math.random() * 4 + 3) + 's'; // Caen despacito
-                s.style.opacity = Math.random() * 0.7 + 0.3; // Diferentes brillos
-                
-                body.appendChild(s);
-                
-                // Borrarlos después de que bajen de la pantalla para no saturar el navegador
-                setTimeout(() => s.remove(), 7000);
-            }, 150); // Sale uno nuevo muy rápido
+                s.innerText = '❤️';
+                s.style.left = Math.random() * 100 + 'vw';
+                s.style.animationDuration = Math.random() * 3 + 2 + 's';
+                document.body.appendChild(s);
+                setTimeout(() => s.remove(), 5000);
+            }, 200);
         }
     </script>
 </body>
