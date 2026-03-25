@@ -9,116 +9,68 @@
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-:root {
-    --love:#ff6b81;
-    --gold:#fccb90;
-}
-
 body,html{
-    margin:0;padding:0;
-    width:100%;height:100%;
-    overflow:hidden;
-    font-family:'Quicksand',sans-serif;
-    background:#050505;
-    color:white;
+margin:0;padding:0;
+width:100%;height:100%;
+background:#050505;
+color:white;
+overflow:hidden;
+font-family:'Quicksand',sans-serif;
 }
 
-/* INICIO */
 #start-screen{
-    position:fixed;
-    width:100%;height:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    background:#000;
-    z-index:9999;
-    cursor:pointer;
+position:fixed;
+width:100%;height:100%;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+background:#000;
+z-index:9999;
+cursor:pointer;
 }
 
 .heart-icon{
-    font-size:6rem;
-    animation:beat 1.2s infinite;
+font-size:6rem;
+animation:beat 1.2s infinite;
 }
 
 @keyframes beat{50%{transform:scale(1.2);}}
 
-/* BOTÓN MÚSICA */
-#music-btn{
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    background:var(--love);
-    border:none;
-    padding:15px;
-    border-radius:50%;
-    font-size:1.5rem;
-    z-index:1000;
-}
-
-/* FONDO */
-#nebula{
-    position:fixed;
-    width:100%;height:100%;
-    background:radial-gradient(circle,#1b2735,#090a0f);
-}
-
-/* OBJETOS */
 .interactive-obj{
-    position:absolute;
-    font-size:3rem;
-    cursor:pointer;
-    animation:float 4s infinite;
+position:absolute;
+font-size:3rem;
+cursor:pointer;
+animation:float 4s infinite;
 }
 
-@keyframes float{50%{transform:translateY(-15px);}}
-
-/* CHAT */
-.chat{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    max-height:300px;
-    overflow:auto;
-}
-
-.msg{
-    padding:10px;
-    border-radius:15px;
-    max-width:70%;
-}
-
-.me{background:#ff6b81; align-self:flex-end;}
-.her{background:#eee; color:#000; align-self:flex-start;}
+@keyframes float{50%{transform:translateY(-10px);}}
 
 /* MODAL */
 .modal{
-    display:none;
-    position:fixed;
-    width:100%;height:100%;
-    background:rgba(0,0,0,0.95);
-    justify-content:center;
-    align-items:center;
+display:none;
+position:fixed;
+width:100%;height:100%;
+background:rgba(0,0,0,0.9);
+justify-content:center;
+align-items:center;
 }
 
 .modal-content{
-    background:white;
-    color:#000;
-    padding:20px;
-    border-radius:20px;
-    max-width:350px;
-    text-align:center;
+background:white;
+color:#000;
+padding:20px;
+border-radius:20px;
+text-align:center;
 }
 
-/* CORAZONES */
-.heart{
-    position:absolute;
-    color:#ff6b81;
-    animation:fall 3s linear;
-}
-
-@keyframes fall{
-    to{transform:translateY(100vh);opacity:0;}
+button{
+margin-top:10px;
+padding:10px;
+border:none;
+background:#ff6b81;
+color:white;
+border-radius:10px;
 }
 </style>
 </head>
@@ -126,17 +78,14 @@ body,html{
 <body>
 
 <div id="start-screen">
-    <div class="heart-icon">❤️</div>
-    <h1>Tócame...</h1>
+<div class="heart-icon">❤️</div>
+<h1>Toca para empezar</h1>
 </div>
 
-<audio id="bg-music" loop>
-    <source src="cancion.mp3" type="audio/mpeg">
+<!-- 🔥 AUDIO CORRECTO -->
+<audio id="bg-music" loop preload="auto">
+<source src="cancion.mp3" type="audio/mpeg">
 </audio>
-
-<button id="music-btn">🔊</button>
-
-<div id="nebula"></div>
 
 <!-- OBJETOS -->
 <div class="interactive-obj" style="top:30%;left:20%" onclick="show(1)">💖</div>
@@ -151,107 +100,47 @@ body,html{
 
 <script>
 const audio = document.getElementById("bg-music");
-let playing=false;
+let started = false;
 
-/* INICIO */
-document.getElementById("start-screen").onclick=()=>{
-    document.getElementById("start-screen").style.display="none";
-    audio.play();
-    playing=true;
-}
+/* 🔥 ESTO ES LO IMPORTANTE */
+document.getElementById("start-screen").addEventListener("click", function () {
 
-/* BOTÓN MÚSICA */
-document.getElementById("music-btn").onclick=()=>{
-    if(playing){
-        audio.pause();
-        playing=false;
-    }else{
-        audio.play();
-        playing=true;
-    }
-}
+if(started) return;
+started = true;
+
+this.style.display = "none";
+
+/* FORZAR REPRODUCCIÓN REAL */
+audio.muted = false;
+audio.volume = 1;
+
+audio.play().then(()=>{
+console.log("Música iniciada correctamente");
+}).catch(err=>{
+console.log("Error audio:", err);
+alert("Toca otra vez para activar la música ❤️");
+});
+});
 
 /* SORPRESAS */
-let found=new Set();
-
 function show(n){
-    found.add(n);
+let textos=[
+"Eres el amor de mi vida ❤️",
+"Todo de ti me encanta 😍",
+"Vale por un beso 😘",
+"<img src='foto.jpg' width='200'><br>Mi momento favorito ❤️",
+"Siempre tú 💍"
+];
 
-    if(n===4){
-        showChat();
-        return;
-    }
+document.getElementById("modal-content").innerHTML=
+`<p>${textos[n-1]}</p>
+<button onclick="closeModal()">Cerrar</button>`;
 
-    let textos=[
-        "Eres mi todo ❤️",
-        "Amo tu sonrisa 😍",
-        "Vale por un beso 😘",
-        "",
-        "Siempre tú 💍"
-    ];
-
-    document.getElementById("modal-content").innerHTML=
-    `<p>${textos[n-1]}</p>
-    <button onclick="closeModal()">Cerrar</button>`;
-
-    document.getElementById("modal").style.display="flex";
-
-    if(found.size===5) explodeHearts();
-}
-
-/* CHAT ANIMADO */
-function showChat(){
-    let chatHTML=`<div class="chat" id="chat"></div>`;
-    document.getElementById("modal-content").innerHTML=chatHTML;
-    document.getElementById("modal").style.display="flex";
-
-    const msgs=[
-        {t:"Hola mi amor ❤️",c:"me"},
-        {t:"Hola mi vida 😍",c:"her"},
-        {t:"Te amo demasiado",c:"me"},
-        {t:"Yo más 😘",c:"her"},
-        {t:"Siempre tú y yo 💖",c:"me"}
-    ];
-
-    let i=0;
-    let chat=document.getElementById("chat");
-
-    let interval=setInterval(()=>{
-        if(i>=msgs.length){clearInterval(interval);return;}
-        let m=document.createElement("div");
-        m.className="msg "+msgs[i].c;
-        m.innerText=msgs[i].t;
-        chat.appendChild(m);
-        chat.scrollTop=chat.scrollHeight;
-        i++;
-    },800);
-}
-
-/* EXPLOSIÓN */
-function explodeHearts(){
-    setInterval(()=>{
-        let h=document.createElement("div");
-        h.className="heart";
-        h.innerText="❤️";
-        h.style.left=Math.random()*100+"vw";
-        document.body.appendChild(h);
-        setTimeout(()=>h.remove(),3000);
-    },200);
+document.getElementById("modal").style.display="flex";
 }
 
 function closeModal(){
-    document.getElementById("modal").style.display="none";
-}
-
-/* ESTRELLAS INTERACTIVAS */
-document.onclick=(e)=>{
-    let s=document.createElement("div");
-    s.innerText="✨";
-    s.style.position="absolute";
-    s.style.left=e.pageX+"px";
-    s.style.top=e.pageY+"px";
-    document.body.appendChild(s);
-    setTimeout(()=>s.remove(),1000);
+document.getElementById("modal").style.display="none";
 }
 </script>
 
