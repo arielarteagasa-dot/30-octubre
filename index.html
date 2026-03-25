@@ -20,14 +20,15 @@
             overflow: hidden;
             font-family: 'Quicksand', sans-serif;
             color: white;
+            perspective: 1000px;
             background: #050505; /* Fondo noche profunda */
         }
 
-        /* --- FONDO DE NEBULOSA ANIMADA --- */
+        /* --- FONDO DE NEBULOSA ASOMBROSO (Dinámico y Full Movimiento) --- */
         #nebula {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -2;
-            background: linear-gradient(120deg, #1b2735 0%, #090a0f 100%);
+            background: radial-gradient(circle at 50% 50%, #1b2735 0%, #090a0f 100%);
             background-size: 400% 400%;
             animation: nebulaMove 15s ease infinite;
         }
@@ -38,7 +39,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* --- PARTÍCULAS BRILLANTES (ESTRELLAS FLOTANTES) --- */
+        /* --- PARTÍCULAS BRILLANTES (Estrellas Flotantes) --- */
         .particle {
             position: absolute;
             background: white; border-radius: 50%;
@@ -78,21 +79,21 @@
             border: 1px solid rgba(255,255,255,0.3);
         }
 
-        /* --- FRASES BONITAS EN EL RASTRO (REMPLAZAN CORAZONES) --- */
+        /* --- FRASES BONITAS EN EL RASTRO (Rápido y Numeroso) --- */
         .phrase-trail {
             position: absolute;
             color: white; pointer-events: none;
             font-weight: bold; font-size: 1.1rem;
-            animation: fadeUp 1s ease-out forwards;
+            animation: fadeUpFast 0.8s ease-out forwards;
             z-index: 1000; text-shadow: 0 0 10px rgba(255,255,255,0.5);
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             padding: 5px 15px; border-radius: 20px;
             backdrop-filter: blur(5px);
         }
 
-        @keyframes fadeUp {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-30px) scale(0.8); opacity: 0; }
+        @keyframes fadeUpFast {
+            0% { transform: translateY(0) scale(1.1); opacity: 1; filter: blur(0px); }
+            100% { transform: translateY(-40px) scale(0.7); opacity: 0; filter: blur(1px); }
         }
 
         /* --- OBJETOS INTERACTIVOS (Búsqueda Divertida) --- */
@@ -149,9 +150,16 @@
             cursor: pointer; margin-top: 20px; width: 100%;
         }
 
-        /* --- CARTA FINAL --- */
-        #final-letter-modal {
-            max-width: 450px; background: white; color: #333; text-align: left;
+        /* --- EFECTO INCREÍBLE AL CERRAR --- */
+        .star-particle {
+            position: absolute; pointer-events: none;
+            font-size: 1.5rem; animation: starFall 1.5s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes starFall {
+            0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100px) scale(0) rotate(360deg); opacity: 0; }
         }
     </style>
 </head>
@@ -160,7 +168,7 @@
     <div id="nebula"></div>
 
     <div id="ui-container">
-        <h1>Nuestra Galaxia de Amor</h1>
+        <h1>Nuestra Galaxia Mágica</h1>
         <div id="contador">00d 00h 00m 00s</div>
         <p style="opacity: 0.8; font-size: 0.9rem; margin-top: 15px; pointer-events: none;">Toca los 5 objetos flotantes ✨</p>
     </div>
@@ -202,7 +210,7 @@
         const body = document.body;
 
         // Crear estrellas flotantes automática
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 80; i++) {
             const p = document.createElement('div');
             p.className = 'particle';
             p.style.width = p.style.height = Math.random() * 4 + 1 + 'px';
@@ -213,25 +221,25 @@
             body.appendChild(p);
         }
 
-        // --- 3. RASTRO DEL CURSOR CON FRASES (NUEVA FUNCIÓN) ---
+        // --- 3. RASTRO DEL CURSOR CON FRASES (ACELERADO Y NUMEROSO) ---
         const frases = ["mi amor ❤️", "Mi gordita ☁️", "Mi caprichosita 🎀", "Mi tiquitita ✨", "Mi mujer 💍"];
 
         function createTrail(e) {
-            // No creamos una partícula en cada movimiento para no saturar
-            if (Math.random() > 0.1) return; 
-
-            const t = document.createElement('div');
-            t.className = 'phrase-trail';
-            
-            // Elegir una frase al azar
-            t.innerText = frases[Math.floor(Math.random() * frases.length)];
-            
-            // Posicionar en el cursor
-            t.style.left = e.pageX + 'px';
-            t.style.top = e.pageY + 'px';
-            
-            body.appendChild(t);
-            setTimeout(() => t.remove(), 1000); // Borrar después de 1 segundo
+            // Creamos partículas casi siempre para el efecto "full rápido"
+            if (Math.random() > 0.01) { 
+                const t = document.createElement('div');
+                t.className = 'phrase-trail';
+                
+                // Elegir una frase al azar
+                t.innerText = frases[Math.floor(Math.random() * frases.length)];
+                
+                // Posicionar en el cursor
+                t.style.left = e.pageX + 'px';
+                t.style.top = e.pageY + 'px';
+                
+                body.appendChild(t);
+                setTimeout(() => t.remove(), 800); // Borrar más rápido
+            }
         }
         function createTrailTouch(e) { createTrail(e.touches[0]); }
 
@@ -267,7 +275,7 @@
                 case 1: content = `<h3>Un Mensaje</h3><p class="modal-text">Eres el 'te amo' más sincero que he dicho. 💖</p>`; break;
                 case 2: content = `
                         <h3>Mini-Trivia 🤔</h3><p class="modal-text"><b>¿Cuál fue nuestro primer viaje juntos?</b></p>
-                        <button class="trivia-btn" onclick="checkTrivia(true)">En grupo a la playa 🏖️</button>
+                        <button class="trivia-btn" onclick="checkTrivia(true)">A la playa 🏖️</button>
                         <button class="trivia-btn" onclick="checkTrivia(false)">Al centro comercial / Cine</button>
                         <p id="trivia-feedback" style="margin-top:10px;"></p>
                     `; break;
@@ -279,7 +287,7 @@
                 case 4: content = `
                         <h3>Nuestro Pergamino Mágico</h3>
                         <img src="https://via.placeholder.com/400x300?text=PON+AQUI+TU+FOTO" alt="Foto Pergamino">
-                        <p class="modal-text">Esta foto me recuerda lo feliz que soy contigo.</p>
+                        <p class="modal-text">Este es mi recuerdo mas bonito contigo.</p>
                     `; break;
                 case 5: content = `<h3>Para Mi Mujer 💍</h3><p class="modal-text">Eres la dueña de mi corazón por siempre. ¡Te amo!</p>`; break;
             }
@@ -314,9 +322,24 @@
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
-        // --- 6. CARTA FINAL (SOLUCIONADA) ---
+        // --- 6. CARTA FINAL (MEJORADA CON EFECTO INCREÍBLE) ---
         function showFinalLetter() { document.getElementById('modal-final').style.display = 'flex'; }
-        function closeFinalLetter() { document.getElementById('modal-final').style.display = 'none'; }
+        function closeFinalLetter() { 
+            // Crear el efecto increíble
+            const mc = document.getElementById('modal-final');
+            for (let i = 0; i < 40; i++) {
+                const s = document.createElement('div');
+                s.className = 'star-particle';
+                s.innerHTML = ['✨', '❤️', '🌟'][Math.floor(Math.random()*3)];
+                s.style.left = (Math.random() * 100) + 'vw';
+                s.style.top = (Math.random() * 100) + 'vh';
+                s.style.animationDelay = (Math.random() * 0.5) + 's';
+                body.appendChild(s);
+                setTimeout(() => s.remove(), 2000);
+            }
+
+            setTimeout(() => { mc.style.display = 'none'; }, 500); 
+        }
     </script>
 </body>
 </html>
