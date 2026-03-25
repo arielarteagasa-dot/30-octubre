@@ -79,21 +79,23 @@
             border: 1px solid rgba(255,255,255,0.3);
         }
 
-        /* --- FRASES BONITAS EN EL RASTRO (Rápido y Numeroso) --- */
+        /* --- FRASES BONITAS EN EL RASTRO (Más lentas y legibles) --- */
         .phrase-trail {
             position: absolute;
             color: white; pointer-events: none;
-            font-weight: bold; font-size: 1.1rem;
-            animation: fadeUpFast 0.8s ease-out forwards;
-            z-index: 1000; text-shadow: 0 0 10px rgba(255,255,255,0.5);
-            background: rgba(255, 255, 255, 0.15);
-            padding: 5px 15px; border-radius: 20px;
-            backdrop-filter: blur(5px);
+            font-weight: bold; font-size: 1.2rem;
+            /* Animación más lenta (2.5s) */
+            animation: fadeUpSlow 2.5s ease-out forwards;
+            z-index: 1000; 
+            /* Sombra oscura para que resalte sin necesidad de recuadro */
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.9), 0 0 10px var(--pink);
+            white-space: nowrap;
         }
 
-        @keyframes fadeUpFast {
-            0% { transform: translateY(0) scale(1.1); opacity: 1; filter: blur(0px); }
-            100% { transform: translateY(-40px) scale(0.7); opacity: 0; filter: blur(1px); }
+        @keyframes fadeUpSlow {
+            0% { transform: translateY(0) scale(0.8); opacity: 0; }
+            20% { opacity: 1; transform: translateY(-10px) scale(1.1); }
+            100% { transform: translateY(-80px) scale(1); opacity: 0; }
         }
 
         /* --- OBJETOS INTERACTIVOS (Búsqueda Divertida) --- */
@@ -150,16 +152,14 @@
             cursor: pointer; margin-top: 20px; width: 100%;
         }
 
-        /* --- EFECTO INCREÍBLE AL CERRAR --- */
-        .star-particle {
-            position: absolute; pointer-events: none;
-            font-size: 1.5rem; animation: starFall 1.5s ease-out forwards;
-            z-index: 1000;
+        /* --- EFECTO INCREÍBLE AL CERRAR (Lluvia Infinita) --- */
+        .falling-magic {
+            position: absolute; top: -50px; pointer-events: none; z-index: 500;
+            animation: fallMagic linear infinite;
         }
 
-        @keyframes starFall {
-            0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100px) scale(0) rotate(360deg); opacity: 0; }
+        @keyframes fallMagic {
+            to { transform: translateY(110vh) rotate(360deg); }
         }
     </style>
 </head>
@@ -201,7 +201,6 @@
 
     <script>
         // --- 1. CONFIGURACIÓN INICIAL ---
-        // Fecha de Aniversario: 30 Oct 2025
         const startDate = new Date('October 30, 2025 00:00:00').getTime();
         let objectsFound = new Set();
         const totalObjects = 5;
@@ -209,7 +208,6 @@
         // --- 2. FONDO Y EFECTOS ---
         const body = document.body;
 
-        // Crear estrellas flotantes automática
         for (let i = 0; i < 80; i++) {
             const p = document.createElement('div');
             p.className = 'particle';
@@ -221,25 +219,24 @@
             body.appendChild(p);
         }
 
-        // --- 3. RASTRO DEL CURSOR CON FRASES (ACELERADO Y NUMEROSO) ---
+        // --- 3. RASTRO DEL CURSOR CON FRASES ---
         const frases = ["mi amor ❤️", "Mi gordita ☁️", "Mi caprichosita 🎀", "Mi tiquitita ✨", "Mi mujer 💍"];
 
         function createTrail(e) {
-            // Creamos partículas casi siempre para el efecto "full rápido"
-            if (Math.random() > 0.01) { 
-                const t = document.createElement('div');
-                t.className = 'phrase-trail';
-                
-                // Elegir una frase al azar
-                t.innerText = frases[Math.floor(Math.random() * frases.length)];
-                
-                // Posicionar en el cursor
-                t.style.left = e.pageX + 'px';
-                t.style.top = e.pageY + 'px';
-                
-                body.appendChild(t);
-                setTimeout(() => t.remove(), 800); // Borrar más rápido
-            }
+            // Bajamos la frecuencia de aparición para que no se encimen y se puedan leer bien
+            if (Math.random() > 0.06) return; 
+            
+            const t = document.createElement('div');
+            t.className = 'phrase-trail';
+            
+            t.innerText = frases[Math.floor(Math.random() * frases.length)];
+            
+            t.style.left = e.pageX + 'px';
+            t.style.top = e.pageY + 'px';
+            
+            body.appendChild(t);
+            // Ahora duran 2.5 segundos antes de borrarse
+            setTimeout(() => t.remove(), 2500); 
         }
         function createTrailTouch(e) { createTrail(e.touches[0]); }
 
@@ -248,7 +245,6 @@
             const now = new Date().getTime();
             const diff = now - startDate;
             
-            // Si la fecha aún no llega
             if(diff < 0) {
                 document.getElementById('contador').innerHTML = "Faltan pocos días para nuestro día...";
                 return;
@@ -266,7 +262,7 @@
         // --- 5. LÓGICA DE JUEGO (BÚSQUEDA) ---
         function showSurprise(id) {
             objectsFound.add(id);
-            document.getElementById('obj'+id).style.opacity = '0.3'; // Marcar como visitado
+            document.getElementById('obj'+id).style.opacity = '0.3'; 
 
             const mc = document.getElementById('modal-content');
             let content = '';
@@ -292,7 +288,6 @@
                 case 5: content = `<h3>Para Mi Mujer 💍</h3><p class="modal-text">Eres la dueña de mi corazón por siempre. ¡Te amo!</p>`; break;
             }
 
-            // Si no es trivia, poner el botón normal
             if (id !== 2) {
                 content += `<button class="btn-close" onclick="closeModal()">Seguir Explorando</button>`;
             }
@@ -322,23 +317,31 @@
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
-        // --- 6. CARTA FINAL (MEJORADA CON EFECTO INCREÍBLE) ---
+        // --- 6. CARTA FINAL Y LLUVIA INFINITA ---
         function showFinalLetter() { document.getElementById('modal-final').style.display = 'flex'; }
+        
         function closeFinalLetter() { 
-            // Crear el efecto increíble
             const mc = document.getElementById('modal-final');
-            for (let i = 0; i < 40; i++) {
+            mc.style.display = 'none'; 
+            
+            // Iniciar lluvia constante y hermosa para que no se vea vacío
+            setInterval(() => {
                 const s = document.createElement('div');
-                s.className = 'star-particle';
-                s.innerHTML = ['✨', '❤️', '🌟'][Math.floor(Math.random()*3)];
+                s.className = 'falling-magic';
+                const emojis = ['✨', '❤️', '🌟', '💖', '🌸', '💘', '💫'];
+                s.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                // Posición y estilo aleatorio
                 s.style.left = (Math.random() * 100) + 'vw';
-                s.style.top = (Math.random() * 100) + 'vh';
-                s.style.animationDelay = (Math.random() * 0.5) + 's';
+                s.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                s.style.animationDuration = (Math.random() * 4 + 3) + 's'; // Caen despacito
+                s.style.opacity = Math.random() * 0.7 + 0.3; // Diferentes brillos
+                
                 body.appendChild(s);
-                setTimeout(() => s.remove(), 2000);
-            }
-
-            setTimeout(() => { mc.style.display = 'none'; }, 500); 
+                
+                // Borrarlos después de que bajen de la pantalla para no saturar el navegador
+                setTimeout(() => s.remove(), 7000);
+            }, 150); // Sale uno nuevo muy rápido
         }
     </script>
 </body>
