@@ -23,34 +23,7 @@
             background: #050505;
         }
 
-        /* PANTALLA DE INICIO (Activa la música) */
-        #start-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
-            z-index: 9999;
-            display: flex; align-items: center; justify-content: center; flex-direction: column;
-            cursor: pointer; text-align: center;
-        }
-
-        #start-screen h1 {
-            font-family: 'Dancing Script', cursive;
-            font-size: 3.5rem; color: var(--love);
-            text-shadow: 0 0 20px rgba(255, 107, 129, 0.5);
-            margin: 0;
-        }
-
-        .heart-icon {
-            font-size: 6rem;
-            animation: beat 1.2s infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes beat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-
-        /* FONDO Y ESTRELLAS */
+        /* --- FONDO DE NEBULOSA (RESTAURADO) --- */
         #nebula {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -2;
@@ -75,6 +48,22 @@
         @keyframes floatParticle {
             to { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
         }
+
+        /* PANTALLA DE INICIO */
+        #start-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            cursor: pointer; text-align: center;
+        }
+
+        #start-screen h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3.5rem; color: var(--love);
+            animation: beat 1.2s infinite;
+        }
+
+        @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
         /* INTERFAZ */
         #ui-container {
@@ -101,7 +90,7 @@
             position: absolute; color: white; pointer-events: none;
             font-weight: bold; font-size: 1.2rem;
             animation: fadeUpSlow 2.5s ease-out forwards;
-            z-index: 1000; text-shadow: 2px 2px 8px rgba(0,0,0,0.9), 0 0 10px var(--pink);
+            z-index: 1000; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);
         }
 
         @keyframes fadeUpSlow {
@@ -112,21 +101,9 @@
 
         .interactive-obj {
             position: absolute; cursor: pointer; z-index: 5;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            font-size: 3rem; user-select: none;
-            filter: drop-shadow(0 0 10px white);
+            transition: 0.3s; font-size: 3rem; user-select: none;
         }
 
-        #final-letter-btn {
-            display: none; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px 40px; background: var(--gold); border: none;
-            border-radius: 50px; font-family: 'Dancing Script';
-            font-size: 2rem; color: #333; cursor: pointer;
-            box-shadow: 0 0 30px var(--gold); z-index: 100;
-        }
-
-        /* MODALES */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.92); z-index: 1000;
@@ -136,7 +113,6 @@
         .modal-content {
             background: white; padding: 25px; border-radius: 20px;
             text-align: center; color: #333; max-width: 320px;
-            box-shadow: 0 0 30px rgba(255,255,255,0.2);
         }
         
         .modal img { width: 100%; border-radius: 10px; margin-bottom: 15px; }
@@ -145,6 +121,15 @@
             background: var(--love); color: white; border: none;
             padding: 12px 25px; border-radius: 20px; font-weight: 700;
             cursor: pointer; margin-top: 20px; width: 100%;
+        }
+
+        #final-letter-btn {
+            display: none; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px; background: var(--gold); border: none;
+            border-radius: 50px; font-family: 'Dancing Script';
+            font-size: 2rem; color: #333; cursor: pointer;
+            box-shadow: 0 0 30px var(--gold); z-index: 100;
         }
 
         .trivia-btn {
@@ -164,21 +149,21 @@
 <body onmousemove="createTrail(event)" ontouchmove="createTrailTouch(event)">
 
     <div id="start-screen" onclick="startExperience()">
-        <div class="heart-icon">❤️</div>
-        <h1>Toca para entrar, mi amor</h1>
-        <p style="color: #aaa; margin-top: 15px;">(Sube el volumen 🎵)</p>
+        <div style="font-size: 6rem;">❤️</div>
+        <h1>Toca para entrar</h1>
+        <p style="color: #aaa; margin-top: 15px;">Asegúrate de tener el volumen alto 🎵</p>
     </div>
 
     <audio id="bg-music" loop preload="auto">
-        <source src="https://raw.githubusercontent.com/arielarteagasa-dot/30-octubre/main/cancion.mp3" type="audio/mpeg">
+        <source src="cancion.mp3" type="audio/mpeg">
     </audio>
 
     <div id="nebula"></div>
 
     <div id="ui-container">
         <h1>Nuestra Galaxia Mágica</h1>
-        <div id="contador">Cargando...</div>
-        <p style="opacity: 0.8; font-size: 0.9rem; margin-top: 15px;">Toca los 5 objetos flotantes ✨</p>
+        <div id="contador">Cargando momentos...</div>
+        <p style="opacity: 0.8; font-size: 0.9rem; margin-top: 15px;">Encuentra los 5 tesoros flotantes ✨</p>
     </div>
 
     <div class="interactive-obj" style="top:30%; left:20%;" id="obj1" onclick="showSurprise(1)">💖</div>
@@ -209,16 +194,24 @@
     <script>
         const audio = document.getElementById('bg-music');
 
-        // REPRODUCIR MÚSICA AL ENTRAR
         function startExperience() {
             document.getElementById('start-screen').style.display = 'none';
-            audio.play().catch(e => console.log("Error de audio:", e));
+            // Intentar reproducir la música
+            var playPromise = audio.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    console.log("Música iniciada correctamente");
+                }).catch(error => {
+                    console.log("Error al reproducir: El navegador bloqueó el audio.");
+                });
+            }
         }
 
         const startDate = new Date('October 30, 2025 00:00:00').getTime();
         let objectsFound = new Set();
 
-        // ESTRELLAS FLOTANTES
+        // ESTRELLAS
         for (let i = 0; i < 60; i++) {
             const p = document.createElement('div');
             p.className = 'particle';
@@ -229,7 +222,7 @@
             document.body.appendChild(p);
         }
 
-        // RASTRO DE FRASES
+        // RASTRO
         const frases = ["mi amor ❤️", "Mi gordita ☁️", "Mi vida ✨", "Te amo 💍"];
         function createTrail(e) {
             if (Math.random() > 0.1) return;
@@ -243,22 +236,20 @@
         }
         function createTrailTouch(e) { createTrail(e); }
 
-        // CONTADOR DE TIEMPO
+        // CONTADOR
         function updateCounter() {
             const diff = new Date().getTime() - startDate;
             const d = Math.floor(diff / 86400000);
             const h = Math.floor((diff % 86400000) / 3600000);
             const m = Math.floor((diff % 3600000) / 60000);
             const s = Math.floor((diff % 60000) / 1000);
-            document.getElementById('contador').innerHTML = `Llevamos juntos: ${d}d ${h}h ${m}m ${s}s`;
+            document.getElementById('contador').innerHTML = `Llevamos juntos: ${d}d ${h}h ${m}s`;
         }
         setInterval(updateCounter, 1000);
-        updateCounter();
 
-        // SORPRESAS AL TOCAR OBJETOS
+        // SORPRESAS
         function showSurprise(id) {
-            // Re-intento de audio por seguridad
-            audio.play().catch(() => {});
+            audio.play().catch(() => {}); // Asegurar audio en cada click
 
             objectsFound.add(id);
             document.getElementById('obj'+id).style.opacity = '0.3'; 
@@ -270,7 +261,7 @@
                 case 2: c = `
                     <h3>Pregunta... 🤔</h3><p><b>¿Qué es lo que más me gusta de ti?</b></p>
                     <button class="trivia-btn" onclick="alert('¡Exacto! Me encanta absolutamente TODO de ti ❤️')">¡Todo! Tu forma de ser y tu carita 😍</button>
-                    <button class="trivia-btn" onclick="alert('También, ¡pero la respuesta correcta es TODO! ❤️')">Tu sonrisa hermosa 😊</button>
+                    <button class="trivia-btn" onclick="alert('¡También! Pero la respuesta correcta es TODO ❤️')">Tu sonrisa hermosa 😊</button>
                 `; break;
                 case 3: c = '<h3>¡Regalo! 🎁</h3><p>Vale por un beso de 10 segundos. <br>(Toma captura 😉)</p>'; break;
                 case 4: c = '<h3>Nuestro Recuerdo</h3><img src="foto.jpg" alt="Foto"><p>Este momento lo guardo en mi corazón.</p>'; break;
@@ -295,7 +286,6 @@
                 s.className = 'falling-magic';
                 s.innerText = '❤️';
                 s.style.left = Math.random() * 100 + 'vw';
-                s.style.fontSize = Math.random() * 20 + 10 + 'px';
                 s.style.animationDuration = Math.random() * 3 + 2 + 's';
                 document.body.appendChild(s);
                 setTimeout(() => s.remove(), 5000);
