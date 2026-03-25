@@ -24,6 +24,20 @@
             background: #050505; /* Fondo noche profunda */
         }
 
+        /* --- PANTALLA DE INICIO (Necesaria para que suene la música) --- */
+        #start-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #050505; z-index: 9999;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            cursor: pointer; text-align: center; padding: 20px;
+        }
+
+        #start-screen h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem; color: var(--love);
+            animation: pulse 2s infinite;
+        }
+
         /* --- FONDO DE NEBULOSA ASOMBROSO (Dinámico y Full Movimiento) --- */
         #nebula {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -84,10 +98,8 @@
             position: absolute;
             color: white; pointer-events: none;
             font-weight: bold; font-size: 1.2rem;
-            /* Animación más lenta (2.5s) */
             animation: fadeUpSlow 2.5s ease-out forwards;
             z-index: 1000; 
-            /* Sombra oscura para que resalte sin necesidad de recuadro */
             text-shadow: 2px 2px 8px rgba(0,0,0,0.9), 0 0 10px var(--pink);
             white-space: nowrap;
         }
@@ -165,6 +177,15 @@
 </head>
 <body onmousemove="createTrail(event)" ontouchmove="createTrailTouch(event)">
 
+    <div id="start-screen" onclick="startExperience()">
+        <h1>Toca para abrir tu sorpresa 💖</h1>
+        <p style="font-size: 1.2rem; margin-top: 10px; opacity: 0.8;">Sube el volumen 🎵</p>
+    </div>
+
+    <audio id="bg-music" loop>
+        <source src="cancion.mp3" type="audio/mpeg">
+    </audio>
+
     <div id="nebula"></div>
 
     <div id="ui-container">
@@ -200,6 +221,12 @@
     </div>
 
     <script>
+        // --- 0. INICIAR EXPERIENCIA Y MÚSICA ---
+        function startExperience() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('bg-music').play();
+        }
+
         // --- 1. CONFIGURACIÓN INICIAL ---
         const startDate = new Date('October 30, 2025 00:00:00').getTime();
         let objectsFound = new Set();
@@ -282,7 +309,7 @@
                     `; break;
                 case 4: content = `
                         <h3>Nuestro Pergamino Mágico</h3>
-                        <img src="https://via.placeholder.com/400x300?text=PON+AQUI+TU+FOTO" alt="Foto Pergamino">
+                        <img src="foto.jpg" alt="Foto Pergamino">
                         <p class="modal-text">Este es mi recuerdo mas bonito contigo.</p>
                     `; break;
                 case 5: content = `<h3>Para Mi Mujer 💍</h3><p class="modal-text">Eres la dueña de mi corazón por siempre. ¡Te amo!</p>`; break;
